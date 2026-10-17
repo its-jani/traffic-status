@@ -1,6 +1,6 @@
 {
   "name": "traffic-status",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Minimalist floating desktop traffic status indicator for AI coding agents",
   "type": "module",
   "os": [
@@ -10,7 +10,7 @@
     "x64"
   ],
   "bin": {
-    "traffic-status": "./bin/traffic-status.js"
+    "traffic-status": "bin/traffic-status.js"
   },
   "engines": {
     "node": ">=18"
@@ -22,9 +22,12 @@
   ],
   "license": "MIT",
   "author": "Traffic Status Team",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/its-jani/traffic-status.git"
+    "url": "git+https://github.com/its-jani/traffic-status.git"
   },
   "homepage": "https://github.com/its-jani/traffic-status#readme",
   "bugs": {
@@ -40,6 +43,6 @@
     "desktop-widget"
   ],
   "optionalDependencies": {
-    "@its-jani/traffic-status-win32-x64": "0.1.0"
+    "@its-jani/traffic-status-win32-x64": "0.1.1"
   }
 }

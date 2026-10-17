@@ -170,7 +170,7 @@ function main() {
       author: "Traffic Status Team",
       repository: {
         type: "git",
-        url: "https://github.com/its-jani/traffic-status.git",
+        url: "git+https://github.com/its-jani/traffic-status.git",
       },
     };
 

@@ -70,11 +70,19 @@ jobs:
           path: release-assets
           merge-multiple: true
 
-      - name: Generate SHA256SUMS and attach installers
-        shell: pwsh
+      - name: Generate SHA256 Checksums
+        shell: powershell
         run: |
           cd release-assets
-          Get-FileHash -Algorithm SHA256 (Get-ChildItem -File) | ForEach-Object { "$($_.Hash.ToLower())  $($_.Name)" } | Set-Content -Encoding ascii SHA256SUMS
+          # Get-FileHash emits FileHashInfo objects with Path/Hash but no Name
+          # property, so `$_.Name` silently expanded to "" and every line was
+          # written as "<hash>  " with no filename. install.ps1 matches on the
+          # filename and could never find its archive. Derive it from Path.
+          Get-FileHash -Algorithm SHA256 (Get-ChildItem -File) |
+            ForEach-Object { "$($_.Hash.ToLower())  $(Split-Path $_.Path -Leaf)" } |
+            Set-Content -Encoding ascii SHA256SUMS
+          # SHA256SUMS intentionally covers the archive only; the installer
+          # itself is attached afterwards and verified via GitHub TLS.
           Copy-Item ../install.ps1 .
 
       - name: Create GitHub Release
