@@ -32,13 +32,20 @@ try {
     # 2. Verify SHA256 Checksum
     Write-Host "🔒 Verifying SHA-256 checksum..." -ForegroundColor Yellow
     $ComputedHash = (Get-FileHash -Path $ZipPath -Algorithm SHA256).Hash.ToLower()
-    $ExpectedLine = (Get-Content $SumsPath | Where-Object { $_ -match $ArchiveName })
+    $ExpectedLine = Get-Content $SumsPath | Where-Object {
+        $_.Trim() -match "(?:^|\s|\*)$([regex]::Escape($ArchiveName))\s*$"
+    } | Select-Object -First 1
+
+    if (-not $ExpectedLine) {
+        # Fallback to general substring match if strict pattern is not matched
+        $ExpectedLine = Get-Content $SumsPath | Where-Object { $_ -match [regex]::Escape($ArchiveName) } | Select-Object -First 1
+    }
     
     if (-not $ExpectedLine) {
         throw "Could not find checksum for $ArchiveName in SHA256SUMS"
     }
 
-    $ExpectedHash = ($ExpectedLine -split '\s+')[0].ToLower()
+    $ExpectedHash = ($ExpectedLine.Trim() -split '\s+')[0].ToLower()
     if ($ComputedHash -ne $ExpectedHash) {
         throw "Checksum verification failed! Expected $ExpectedHash, computed $ComputedHash"
     }
