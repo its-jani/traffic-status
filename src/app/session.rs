@@ -156,13 +156,17 @@ impl SessionStore {
                 if self.active.as_deref() == Some(session_id.as_str()) {
                     self.active = self.order.last().cloned();
                 }
-                vec![AppEffect::Repaint]
+                if self.sessions.is_empty() {
+                    vec![AppEffect::CloseWindow, AppEffect::ExitProcess]
+                } else {
+                    vec![AppEffect::Repaint]
+                }
             }
             IpcCommand::ClearAll => {
                 self.sessions.clear();
                 self.order.clear();
                 self.active = None;
-                vec![AppEffect::Repaint]
+                vec![AppEffect::CloseWindow, AppEffect::ExitProcess]
             }
             IpcCommand::Shutdown => vec![AppEffect::CloseWindow, AppEffect::ExitProcess],
         }
@@ -247,22 +251,30 @@ mod tests {
     #[test]
     fn removing_last_session_clears_active() {
         let mut s = store();
-        s.apply(IpcCommand::SessionOff {
+        let effects = s.apply(IpcCommand::SessionOff {
             session_id: "agent-1".into(),
         });
         assert_eq!(s.active_id(), None);
         assert!(s.order().is_empty());
         assert!(s.active_session().is_none());
+        assert_eq!(
+            effects,
+            vec![AppEffect::CloseWindow, AppEffect::ExitProcess]
+        );
     }
 
     #[test]
     fn clear_all_empties_everything() {
         let mut s = store();
-        s.apply(IpcCommand::ClearAll);
+        let effects = s.apply(IpcCommand::ClearAll);
         assert!(s.sessions().is_empty());
         assert!(s.order().is_empty());
         assert_eq!(s.active_id(), None);
         assert!(!s.has_active_animation());
+        assert_eq!(
+            effects,
+            vec![AppEffect::CloseWindow, AppEffect::ExitProcess]
+        );
     }
 
     #[test]

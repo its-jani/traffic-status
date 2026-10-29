@@ -261,6 +261,10 @@ pub fn install_project(target: &Path, dry_run: bool, force: bool) {
     let claude_cmd_content = include_str!("../.claude/commands/traffic.md");
     let opencode_cmd_content = include_str!("../.opencode/commands/traffic.md");
     let opencode_plugin_content = include_str!("../.opencode/plugins/traffic-status.js");
+    let qoder_cmd_content = include_str!("../.qoder/commands/traffic.md");
+    let codex_cmd_content = include_str!("../.codex/commands/traffic.md");
+    let gemini_cmd_content = include_str!("../.gemini/commands/traffic.md");
+    let skill_content = include_str!("../.agents/skills/traffic-status/SKILL.md");
 
     // 1. Claude Code
     let claude_file = target_dir
@@ -314,6 +318,102 @@ pub fn install_project(target: &Path, dry_run: bool, force: bool) {
         Ok(false) => {
             if !dry_run {
                 println!("  ℹ️ .opencode/plugins/traffic-status.js is already up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    // 3. Qoder CLI
+    let qoder_cmd = target_dir
+        .join(".qoder")
+        .join("commands")
+        .join("traffic.md");
+    match safe_write_file(&qoder_cmd, qoder_cmd_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!("  ✅ Installed .qoder/commands/traffic.md");
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ .qoder/commands/traffic.md is already up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    // 4. Codex
+    let codex_cmd = target_dir
+        .join(".codex")
+        .join("commands")
+        .join("traffic.md");
+    match safe_write_file(&codex_cmd, codex_cmd_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!("  ✅ Installed .codex/commands/traffic.md");
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ .codex/commands/traffic.md is already up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    // 5. Antigravity / Gemini CLI
+    let gemini_cmd = target_dir
+        .join(".gemini")
+        .join("commands")
+        .join("traffic.md");
+    match safe_write_file(&gemini_cmd, gemini_cmd_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!("  ✅ Installed .gemini/commands/traffic.md");
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ .gemini/commands/traffic.md is already up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    let gemini_skill = target_dir
+        .join(".gemini")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    match safe_write_file(&gemini_skill, skill_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!("  ✅ Installed .gemini/skills/traffic-status/SKILL.md");
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ .gemini/skills/traffic-status/SKILL.md is up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    // 6. Universal Agent Skill (.agents/skills)
+    let agent_skill = target_dir
+        .join(".agents")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    match safe_write_file(&agent_skill, skill_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!("  ✅ Installed .agents/skills/traffic-status/SKILL.md");
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ .agents/skills/traffic-status/SKILL.md is up to date");
             }
         }
         Err(e) => eprintln!("  ❌ {e}"),
@@ -429,6 +529,113 @@ pub fn install_global(dry_run: bool, force: bool) {
         let _ = safe_remove_file(&old_plugin, dry_run, false);
     }
 
+    // 3. Global Qoder CLI (~/.qoder/commands/traffic.md)
+    let global_qoder = home.join(".qoder").join("commands").join("traffic.md");
+    let qoder_cmd_content = include_str!("../.qoder/commands/traffic.md");
+    match safe_write_file(&global_qoder, qoder_cmd_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!(
+                    "  ✅ Global Qoder CLI command installed: {}",
+                    global_qoder.display()
+                );
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ Global Qoder CLI command is already up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    // 4. Global Codex (~/.codex/commands/traffic.md)
+    let global_codex = home.join(".codex").join("commands").join("traffic.md");
+    let codex_cmd_content = include_str!("../.codex/commands/traffic.md");
+    match safe_write_file(&global_codex, codex_cmd_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!(
+                    "  ✅ Global Codex command installed: {}",
+                    global_codex.display()
+                );
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ Global Codex command is already up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    // 5. Global Antigravity / Gemini CLI (~/.gemini/commands/traffic.md & skill)
+    let global_gemini = home.join(".gemini").join("commands").join("traffic.md");
+    let gemini_cmd_content = include_str!("../.gemini/commands/traffic.md");
+    match safe_write_file(&global_gemini, gemini_cmd_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!(
+                    "  ✅ Global Antigravity command installed: {}",
+                    global_gemini.display()
+                );
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ Global Antigravity command is already up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    let global_gemini_skill = home
+        .join(".gemini")
+        .join("antigravity")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    let skill_content = include_str!("../.agents/skills/traffic-status/SKILL.md");
+    match safe_write_file(&global_gemini_skill, skill_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!(
+                    "  ✅ Global Antigravity skill installed: {}",
+                    global_gemini_skill.display()
+                );
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ Global Antigravity skill is up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
+    // 6. Global Universal Agent Skill (~/.agents/skills/traffic-status/SKILL.md)
+    let global_agent_skill = home
+        .join(".agents")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    match safe_write_file(&global_agent_skill, skill_content, dry_run, force) {
+        Ok(true) => {
+            if !dry_run {
+                println!(
+                    "  ✅ Global Agent skill installed: {}",
+                    global_agent_skill.display()
+                );
+            }
+        }
+        Ok(false) => {
+            if !dry_run {
+                println!("  ℹ️ Global Agent skill is up to date");
+            }
+        }
+        Err(e) => eprintln!("  ❌ {e}"),
+    }
+
     // Clean legacy binary if present and marked
     clean_legacy_installations(dry_run);
 
@@ -525,6 +732,74 @@ pub fn uninstall_project(target: &Path, dry_run: bool, force: bool) {
 
     safe_remove_empty_dir(&target_dir.join(".opencode"), dry_run);
 
+    // Qoder CLI project command
+    let qoder_cmd = target_dir
+        .join(".qoder")
+        .join("commands")
+        .join("traffic.md");
+    if qoder_cmd.exists() {
+        let _ = safe_remove_file(&qoder_cmd, dry_run, force);
+        safe_remove_empty_dir(&target_dir.join(".qoder").join("commands"), dry_run);
+        safe_remove_empty_dir(&target_dir.join(".qoder"), dry_run);
+    }
+
+    // Codex project command
+    let codex_cmd = target_dir
+        .join(".codex")
+        .join("commands")
+        .join("traffic.md");
+    if codex_cmd.exists() {
+        let _ = safe_remove_file(&codex_cmd, dry_run, force);
+        safe_remove_empty_dir(&target_dir.join(".codex").join("commands"), dry_run);
+        safe_remove_empty_dir(&target_dir.join(".codex"), dry_run);
+    }
+
+    // Antigravity / Gemini CLI project command & skill
+    let gemini_cmd = target_dir
+        .join(".gemini")
+        .join("commands")
+        .join("traffic.md");
+    if gemini_cmd.exists() {
+        let _ = safe_remove_file(&gemini_cmd, dry_run, force);
+        safe_remove_empty_dir(&target_dir.join(".gemini").join("commands"), dry_run);
+    }
+    let gemini_skill = target_dir
+        .join(".gemini")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    if gemini_skill.exists() {
+        let _ = safe_remove_file(&gemini_skill, dry_run, force);
+        safe_remove_empty_dir(
+            &target_dir
+                .join(".gemini")
+                .join("skills")
+                .join("traffic-status"),
+            dry_run,
+        );
+        safe_remove_empty_dir(&target_dir.join(".gemini").join("skills"), dry_run);
+    }
+    safe_remove_empty_dir(&target_dir.join(".gemini"), dry_run);
+
+    // Universal Agent skill
+    let agent_skill = target_dir
+        .join(".agents")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    if agent_skill.exists() {
+        let _ = safe_remove_file(&agent_skill, dry_run, force);
+        safe_remove_empty_dir(
+            &target_dir
+                .join(".agents")
+                .join("skills")
+                .join("traffic-status"),
+            dry_run,
+        );
+        safe_remove_empty_dir(&target_dir.join(".agents").join("skills"), dry_run);
+        safe_remove_empty_dir(&target_dir.join(".agents"), dry_run);
+    }
+
     if !dry_run {
         println!("\n✅ Removed from project: {}", target_dir.display());
     }
@@ -594,7 +869,66 @@ pub fn uninstall_global(dry_run: bool, force: bool) {
         }
     }
 
-    // 3. Remove stable binary
+    // 3. Remove Qoder global command
+    let global_qoder = home.join(".qoder").join("commands").join("traffic.md");
+    if global_qoder.exists() {
+        let _ = safe_remove_file(&global_qoder, dry_run, force);
+        safe_remove_empty_dir(&home.join(".qoder").join("commands"), dry_run);
+        safe_remove_empty_dir(&home.join(".qoder"), dry_run);
+    }
+
+    // 4. Remove Codex global command
+    let global_codex = home.join(".codex").join("commands").join("traffic.md");
+    if global_codex.exists() {
+        let _ = safe_remove_file(&global_codex, dry_run, force);
+        safe_remove_empty_dir(&home.join(".codex").join("commands"), dry_run);
+        safe_remove_empty_dir(&home.join(".codex"), dry_run);
+    }
+
+    // 5. Remove Antigravity / Gemini global command & skill
+    let global_gemini = home.join(".gemini").join("commands").join("traffic.md");
+    if global_gemini.exists() {
+        let _ = safe_remove_file(&global_gemini, dry_run, force);
+        safe_remove_empty_dir(&home.join(".gemini").join("commands"), dry_run);
+    }
+    let global_gemini_skill = home
+        .join(".gemini")
+        .join("antigravity")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    if global_gemini_skill.exists() {
+        let _ = safe_remove_file(&global_gemini_skill, dry_run, force);
+        safe_remove_empty_dir(
+            &home
+                .join(".gemini")
+                .join("antigravity")
+                .join("skills")
+                .join("traffic-status"),
+            dry_run,
+        );
+        safe_remove_empty_dir(
+            &home.join(".gemini").join("antigravity").join("skills"),
+            dry_run,
+        );
+    }
+
+    // 6. Remove Universal Agent global skill
+    let global_agent_skill = home
+        .join(".agents")
+        .join("skills")
+        .join("traffic-status")
+        .join("SKILL.md");
+    if global_agent_skill.exists() {
+        let _ = safe_remove_file(&global_agent_skill, dry_run, force);
+        safe_remove_empty_dir(
+            &home.join(".agents").join("skills").join("traffic-status"),
+            dry_run,
+        );
+        safe_remove_empty_dir(&home.join(".agents").join("skills"), dry_run);
+    }
+
+    // 7. Remove stable binary
     if let Some(stable_bin) = get_stable_bin_path() {
         if stable_bin.exists() {
             if dry_run {

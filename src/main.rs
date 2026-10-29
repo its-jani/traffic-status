@@ -51,14 +51,17 @@ fn main() -> eframe::Result<()> {
         })
         .expect("Failed to spawn IPC thread");
 
-    // Eframe window options: Authentic vertical floating widget
+    // Eframe window options: Authentic vertical floating widget at top-right corner
+    let initial_pos = get_top_right_pos(86.0);
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([88.0, 190.0])
-            .with_min_inner_size([70.0, 140.0])
+            .with_inner_size([86.0, 228.0])
+            .with_min_inner_size([70.0, 160.0])
+            .with_position(initial_pos)
             .with_transparent(true)
             .with_decorations(false)
             .with_always_on_top()
+            .with_taskbar(false)
             .with_title("Traffic Status"),
         ..Default::default()
     };
@@ -68,6 +71,24 @@ fn main() -> eframe::Result<()> {
         native_options,
         Box::new(|cc| Ok(Box::new(TrafficStatusApp::new(cc, rx)))),
     )
+}
+
+#[cfg(target_os = "windows")]
+fn get_top_right_pos(window_width: f32) -> [f32; 2] {
+    #[link(name = "user32")]
+    extern "system" {
+        fn GetSystemMetrics(n_index: i32) -> i32;
+    }
+    // SM_CXSCREEN = 0
+    let screen_w = unsafe { GetSystemMetrics(0) };
+    let margin = 28.0;
+    let x = (screen_w as f32 - window_width - margin).max(0.0);
+    [x, margin]
+}
+
+#[cfg(not(target_os = "windows"))]
+fn get_top_right_pos(window_width: f32) -> [f32; 2] {
+    [1200.0, 28.0]
 }
 
 /// Log every panic with a stable prefix, then defer to the default hook so the

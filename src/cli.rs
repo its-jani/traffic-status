@@ -62,7 +62,13 @@ pub fn handle_cli_args(args: &[String]) -> bool {
             true
         }
         "off" => {
-            send_quick_command("off", "");
+            let port = get_configured_port();
+            if is_daemon_alive(port) {
+                stop_daemon_if_running(false);
+                println!("🛑 Traffic Status light turned off and removed.");
+            } else {
+                println!("ℹ️ Traffic Status is already off.");
+            }
             true
         }
         "green" | "yellow" | "red" => {
@@ -72,7 +78,13 @@ pub fn handle_cli_args(args: &[String]) -> bool {
             true
         }
         "clear" => {
-            send_quick_command("clear", "");
+            let port = get_configured_port();
+            if is_daemon_alive(port) {
+                stop_daemon_if_running(false);
+                println!("🛑 Traffic Status cleared and removed.");
+            } else {
+                println!("ℹ️ Traffic Status is already off.");
+            }
             true
         }
         "--help" | "-h" | "help" => {
@@ -148,7 +160,9 @@ pub fn stop_daemon_if_running(dry_run: bool) {
     let resp_str = String::from_utf8_lossy(&response);
 
     // Verify it is our traffic-status app
-    if !resp_str.contains("HTTP/1.1 200") || !resp_str.contains("traffic-status") {
+    if !resp_str.contains("HTTP/1.1 200")
+        || (!resp_str.contains("traffic-status") && !resp_str.contains("traffic-light"))
+    {
         return;
     }
 

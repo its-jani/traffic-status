@@ -459,16 +459,13 @@ mod tests {
                 ..
             })
         ));
-        assert!(matches!(decide_raw("nonsense"), None));
+        assert!(decide_raw("nonsense").is_none());
     }
 
     #[test]
     fn decide_never_panics_on_garbage() {
         for raw in ["", " ", "GET", "GET ", "\r\n\r\n", "GET / HTTP/9.9\r\n\r\n"] {
-            let outcome = match parse_head(raw) {
-                Some(h) => Some(decide(&h, raw)),
-                None => None,
-            };
+            let outcome = parse_head(raw).map(|h| decide(&h, raw));
             if let Some(o) = outcome {
                 let _ = body_of(&o);
             }

@@ -1,21 +1,20 @@
 # 🚦 traffic-status
 
-> Minimalist floating desktop traffic status widget for AI coding agents (**Claude Code**, **OpenCode**).
+> Minimalist floating desktop traffic status widget for AI coding agents (**Claude Code**, **Qoder CLI**, **Codex**, **OpenCode**, **Antigravity CLI**).
 >
 > **Windows 10/11 (x64) only.**
 
-Sitting **always-on-top** on your desktop, `traffic-status` provides immediate peripheral awareness of your AI agent's state without switching windows or reading terminal logs.
+Sitting **always-on-top** on your desktop, `traffic-status` provides immediate peripheral awareness of your AI agent's state without switching windows or reading terminal logs. It runs completely lightweight and native (built in Rust with `egui` and `eframe`, **not Electron**), has zero taskbar presence, spawns by default in the **top-right corner**, and can be dragged anywhere.
 
 ```
-       ┌───────┐
-       │ ⠿  — ✕│  <-- Drag anywhere / Minimize / Close
-       │  (🔴) │  <-- Red: Needs Input / Confirmation / Error
-       │  (🟡) │  <-- Yellow: Thinking / Generating / Tool Execution
-       │  (🟢) │  <-- Green: Ready / Prompt Idle / Completed
-       └───────┘
+       ╭─────────╮
+       │    ⚙    │  <-- Top hardware screw
+       │   (🔴)  │  <-- Red: Needs Input / Confirmation / Error
+       │   (🟡)  │  <-- Yellow: Thinking / Generating / Tool Execution
+       │   (🟢)  │  <-- Green: Ready / Prompt Idle / Completed
+       │    ⚙    │  <-- Bottom hardware screw
+       ╰─────────╯
 ```
-
-<!-- Screenshot Placeholder: Take a screenshot of the traffic-status widget floating over your code editor showing active agent session tabs and place it here as assets/screenshot.png -->
 
 ---
 
@@ -53,24 +52,28 @@ irm https://github.com/its-jani/traffic-status/releases/latest/download/install.
 Once installed, use `/traffic` in your AI coding assistant:
 
 - **`/traffic on`** (or `/traffic`):
-  Starts the background status daemon (if not already running) and activates the session indicator in 🟢 **Green** (Ready).
+  Starts the background status daemon (if not already running) at the desktop top-right corner and activates the session indicator in 🟢 **Green** (Ready).
 - **Automatic State Transitions**:
-  - 🟡 **Yellow**: When processing, generating tokens, running tools, or executing commands.
+  - 🟡 **Yellow**: When processing, generating tokens, running tools, or executing commands (with breathing pulse glow).
   - 🔴 **Red**: When requiring user permission/confirmation, encountering errors, or blocked.
   - 🟢 **Green**: When the task completes and waits for your next input.
 - **`/traffic off`**:
-  Dismisses the active session from the widget.
+  Completely dismisses and terminates the floating traffic light widget from your screen.
 
 ---
 
 ## 🤖 Supported Agents
 
-`traffic-status` provides first-party integration hooks for:
+`traffic-status` provides first-party integration hooks and slash commands for:
 
 1. **Claude Code**: Native slash commands in `.claude/commands/traffic.md`.
-2. **OpenCode**: Native slash command in `.opencode/commands/traffic.md` and lifecycle plugin in `.opencode/plugins/traffic-status.js`.
+2. **Qoder CLI** (Coder CLI): Native slash commands in `.qoder/commands/traffic.md`.
+3. **OpenAI Codex**: Native slash commands in `.codex/commands/traffic.md`.
+4. **OpenCode**: Native slash command in `.opencode/commands/traffic.md` and lifecycle plugin in `.opencode/plugins/traffic-status.js`.
+5. **Antigravity CLI** (Gemini CLI / AGY): Native slash command in `.gemini/commands/traffic.md` and skill in `.gemini/skills/traffic-status/SKILL.md`.
+6. **Universal Agent Skills**: Standard `SKILL.md` under `.agents/skills/traffic-status/SKILL.md`.
 
-*For other agents (e.g. Aider, custom scripts, terminal loops), control the status directly via the [Native CLI](#-cli-reference) or [REST API](#-rest-api-reference).*
+*For other agents (e.g. Aider, Cursor, custom scripts, terminal loops), control the status directly via the [Native CLI](#-cli-reference) or [REST API](#-rest-api-reference).*
 
 ---
 
@@ -80,12 +83,12 @@ Once installed, use `/traffic` in your AI coding assistant:
 
 | Scope | Command | Files Created / Managed |
 | --- | --- | --- |
-| **Global Scope** | `traffic-status install --global` | **Claude**: `~/.claude/commands/traffic.md`<br>**OpenCode**: `~/.config/opencode/` & `~/.opencode/` (commands & plugins)<br>**Binary**: `%LOCALAPPDATA%\traffic-status\bin\` |
-| **Project Scope** | `traffic-status install --project [PATH]` | `<project>/.claude/commands/traffic.md`<br>`<project>/.opencode/commands/traffic.md`<br>`<project>/.opencode/plugins/traffic-status.js` |
+| **Global Scope** | `traffic-status install --global` | **Claude**: `~/.claude/commands/traffic.md`<br>**Qoder**: `~/.qoder/commands/traffic.md`<br>**Codex**: `~/.codex/commands/traffic.md`<br>**OpenCode**: `~/.config/opencode/` & `~/.opencode/`<br>**Antigravity**: `~/.gemini/commands/traffic.md` & `~/.gemini/antigravity/skills/`<br>**Agent Skills**: `~/.agents/skills/traffic-status/`<br>**Binary**: `%LOCALAPPDATA%\traffic-status\bin\` |
+| **Project Scope** | `traffic-status install --project [PATH]` | `<project>/.claude/commands/traffic.md`<br>`<project>/.qoder/commands/traffic.md`<br>`<project>/.codex/commands/traffic.md`<br>`<project>/.opencode/commands/traffic.md`<br>`<project>/.gemini/commands/traffic.md`<br>`<project>/.agents/skills/traffic-status/` |
 
 ### Uninstallation Guarantee
 - `traffic-status uninstall --global` and `traffic-status uninstall --project` **only** delete files containing the official `traffic-status` marker header (`<!-- generated-by: traffic-status -->` / `// generated-by: traffic-status`).
-- It **never** wipes entire directories (such as `~/.config/opencode` or `~/.claude`), preserving all your custom configurations, settings, and other plugins.
+- It **never** wipes entire directories, preserving all your custom configurations, settings, and other plugins.
 - Use `--dry-run` to preview all file actions before executing.
 
 ---

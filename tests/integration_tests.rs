@@ -50,7 +50,7 @@ fn test_safe_write_protection_and_idempotency() {
         true,
     );
     assert!(result_forced.is_ok(), "Forced write should succeed");
-    assert_eq!(result_forced.unwrap(), true);
+    assert!(result_forced.unwrap());
 
     // 4. Idempotency test: writing the same content again should return Ok(false)
     let result_idempotent = safe_write_file(
@@ -59,9 +59,8 @@ fn test_safe_write_protection_and_idempotency() {
         false,
         false,
     );
-    assert_eq!(
-        result_idempotent.unwrap(),
-        false,
+    assert!(
+        !result_idempotent.unwrap(),
         "Idempotent write should return false (no change)"
     );
 }
@@ -73,7 +72,7 @@ fn test_safe_remove_protection() {
     let marked_file = dir.path().join("our_hook.md");
 
     fs::write(&user_file, "# Important custom config").unwrap();
-    fs::write(&marked_file, &format!("{}\n# Hook", MARKER_MD)).unwrap();
+    fs::write(&marked_file, format!("{}\n# Hook", MARKER_MD)).unwrap();
 
     // 1. safe_remove on user_file should fail without force
     let rem_user = safe_remove_file(&user_file, false, false);
@@ -82,7 +81,7 @@ fn test_safe_remove_protection() {
 
     // 2. safe_remove on marked_file should succeed
     let rem_marked = safe_remove_file(&marked_file, false, false);
-    assert_eq!(rem_marked.unwrap(), true);
+    assert!(rem_marked.unwrap());
     assert!(!marked_file.exists());
 }
 
