@@ -147,7 +147,7 @@ jobs:
               echo "Skipping $PKG_NAME@$PKG_VER (already published)"
             else
               echo "Publishing $PKG_NAME@$PKG_VER with provenance..."
-              npm publish "$pkg" --access public --provenance
+              npm publish "./$pkg" --access public --provenance
             fi
           done
 
@@ -158,6 +158,6 @@ jobs:
             echo "Skipping $MAIN_NAME@$MAIN_VER (already published)"
           else
             echo "Publishing $MAIN_NAME@$MAIN_VER with provenance..."
-            npm publish npm/traffic-status --access public --provenance
+            npm publish ./npm/traffic-status --access public --provenance
           fi
 
