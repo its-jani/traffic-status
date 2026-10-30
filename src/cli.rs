@@ -77,6 +77,19 @@ pub fn handle_cli_args(args: &[String]) -> bool {
             send_quick_command(state, msg);
             true
         }
+        "set" => {
+            let state = args.get(2).map(|s| s.as_str()).unwrap_or("");
+            let msg = args.get(3).map(|s| s.as_str()).unwrap_or("");
+            match state {
+                "green" | "yellow" | "red" => {
+                    send_quick_command(state, msg);
+                }
+                _ => {
+                    eprintln!("Usage: traffic-status set <green|yellow|red> [MESSAGE]");
+                }
+            }
+            true
+        }
         "clear" => {
             let port = get_configured_port();
             if is_daemon_alive(port) {
@@ -120,7 +133,7 @@ fn print_help() {
     );
     println!("  traffic-status on [LABEL]                Activate session");
     println!("  traffic-status off                       Dismiss session");
-    println!("  traffic-status <green|yellow|red> [MSG]  Update status light");
+    println!("  traffic-status [set] <green|yellow|red> [MSG] Update status light");
     println!("  traffic-status clear                     Clear all active sessions");
     println!("  traffic-status --help                    Show this help message");
     println!("  traffic-status --version                 Print version");

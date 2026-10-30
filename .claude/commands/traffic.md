@@ -3,6 +3,12 @@
 
 Execute the corresponding action immediately in 1 step without reading source files or repository searches.
 
+### Lifecycle Event Protocol:
+When active, keep the desktop traffic status synced with your state:
+- When starting work, thinking, or invoking tools: run `traffic-status yellow "Working..."`
+- When asking the user for confirmation, permission, or paused: run `traffic-status red "Waiting for user confirmation"`
+- When done and ready for the next prompt: run `traffic-status green "Ready"`
+
 ### Binary Resolution:
 Locate and execute the `traffic-status` binary in this order:
 1. `traffic-status` (if on PATH)
@@ -28,6 +34,7 @@ Locate and execute the `traffic-status` binary in this order:
   traffic-status red "$ARG"
   ```
 - **`/traffic off`**:
+  Completely shuts down and removes the floating traffic light widget.
   ```powershell
   traffic-status off
   ```

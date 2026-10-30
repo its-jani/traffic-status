@@ -1,7 +1,13 @@
 <!-- generated-by: traffic-status -->
-# Traffic Status Command (/traffic)
+# Traffic Status Slash Command (/traffic)
 
-When `/traffic` is invoked in OpenCode, execute the corresponding action immediately in 1 step without searching the codebase or reading project files.
+Execute the corresponding action immediately in 1 step without reading source files or repository searches.
+
+### Lifecycle Event Protocol:
+When active, keep the desktop traffic status synced with your state:
+- When starting work, thinking, or invoking tools: run `traffic-status yellow "Working..."`
+- When asking the user for confirmation, permission, or paused: run `traffic-status red "Waiting for user confirmation"`
+- When done and ready for the next prompt: run `traffic-status green "Ready"`
 
 ### Binary Resolution:
 Locate and execute the `traffic-status` binary in this order:
@@ -9,14 +15,26 @@ Locate and execute the `traffic-status` binary in this order:
 2. `%LOCALAPPDATA%\traffic-status\bin\traffic-status.exe` (Windows) or `~/.local/share/traffic-status/bin/traffic-status` (macOS/Linux)
 3. `npx -y traffic-status`
 
-### Commands:
-- `/traffic on` -> `traffic-status on "OpenCode"`
-- `/traffic off` -> `traffic-status off`
-- `/traffic yellow [message]` -> `traffic-status yellow "$ARG"`
-- `/traffic green [message]` -> `traffic-status green "$ARG"`
-- `/traffic red [message]` -> `traffic-status red "$ARG"`
-
-### Automatic Lifecycle Rule:
-- When thinking, compiling, or executing tools: send `yellow`.
-- When an error occurs or waiting for user confirmation: send `red`.
-- When task is completed and waiting for user prompt: send `green`.
+### Actions:
+- **/traffic on** (or **/traffic**):
+  Starts the floating status daemon (if not running) and registers the active session.
+  ```powershell
+  traffic-status on "OpenCode"
+  ```
+- **/traffic yellow [msg]** (when thinking/running tools):
+  ```powershell
+  traffic-status yellow "$ARG"
+  ```
+- **/traffic green [msg]** (when ready/waiting for prompt):
+  ```powershell
+  traffic-status green "$ARG"
+  ```
+- **/traffic red [msg]** (when error/needs confirmation):
+  ```powershell
+  traffic-status red "$ARG"
+  ```
+- **/traffic off**:
+  Completely shuts down and removes the floating traffic light widget.
+  ```powershell
+  traffic-status off
+  ```

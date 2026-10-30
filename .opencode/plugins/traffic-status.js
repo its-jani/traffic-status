@@ -11,7 +11,7 @@ const BASE_URL = `http://127.0.0.1:${PORT}`;
 async function isDaemonRunning() {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 350);
+    const timeout = setTimeout(() => controller.abort(), 300);
     const res = await fetch(`${BASE_URL}/ping`, { signal: controller.signal });
     clearTimeout(timeout);
     return res.ok;
@@ -133,13 +133,91 @@ export const TrafficStatusPlugin = async (_ctx) => {
       }),
     },
 
+    event: async ({ event }) => {
+      if (!isSessionActive || !event) return;
+
+      const evType = event.type;
+      const props = event.properties || {};
+
+      if (props.sessionID) {
+        activeSessionId = `opencode-${props.sessionID.slice(0, 8)}`;
+      }
+
+      // 1. Red transitions: Permission prompts, pauses, errors
+      if (evType === "permission.updated" || evType === "permission.ask") {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "red",
+          message: "Waiting for user permission / input 🔴",
+        });
+        return;
+      }
+
+      if (evType === "session.error") {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "red",
+          message: "Session encountered an error 🔴",
+        });
+        return;
+      }
+
+      // 2. Green transitions: User replied, session idle / completed
+      if (evType === "permission.replied") {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "yellow",
+          message: "Permission received, resuming... 🟡",
+        });
+        return;
+      }
+
+      if (evType === "session.idle") {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "green",
+          message: "Ready 🟢",
+        });
+        return;
+      }
+
+      // 3. Status changes (busy -> yellow, idle -> green)
+      if (evType === "session.status" && props.status) {
+        const statusType = props.status.type;
+        if (statusType === "busy") {
+          await sendTrafficPayload("/state", {
+            session_id: activeSessionId,
+            state: "yellow",
+            message: "Working / Thinking... 🟡",
+          });
+        } else if (statusType === "idle") {
+          await sendTrafficPayload("/state", {
+            session_id: activeSessionId,
+            state: "green",
+            message: "Ready 🟢",
+          });
+        }
+      }
+    },
+
     "chat.message": async (input) => {
       if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
       if (isSessionActive) {
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
           state: "yellow",
-          message: "Thinking...",
+          message: "Thinking... 🟡",
+        });
+      }
+    },
+
+    "command.execute.before": async (input) => {
+      if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
+      if (isSessionActive) {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "yellow",
+          message: `Executing ${input.command || "command"}... 🟡`,
         });
       }
     },
@@ -150,7 +228,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
           state: "yellow",
-          message: `Running ${input.tool}...`,
+          message: `Running ${input.tool}... 🟡`,
         });
       }
     },
@@ -160,18 +238,23 @@ export const TrafficStatusPlugin = async (_ctx) => {
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
           state: "red",
-          message: "Waiting for user permission / input",
+          message: "Waiting for user permission / input 🔴",
         });
       }
     },
 
     "tool.execute.after": async (input, output) => {
       if (isSessionActive) {
-        const isError = output && output.output && (output.output.includes("error:") || output.output.includes("Error:") || output.output.includes("Failed"));
+        const isError = output && output.output && (
+          output.output.includes("error:") ||
+          output.output.includes("Error:") ||
+          output.output.includes("Failed") ||
+          output.output.includes("permission denied")
+        );
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
           state: isError ? "red" : "green",
-          message: isError ? "Tool execution error" : "Ready",
+          message: isError ? "Tool error / attention needed 🔴" : "Ready 🟢",
         });
       }
     },

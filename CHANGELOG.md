@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-10-30
+
+### Fixed
+- **Agent Lifecycle Event Transitions**: Fixed status event hooks so `traffic-status` actively updates colors during agent execution and permission prompts. Added listeners for `permission.updated`, `permission.ask`, `session.error` (🔴 Red), `chat.message`, `command.execute.before`, `tool.execute.before` (🟡 Yellow), and `session.idle`, `session.status: idle` (🟢 Green).
+- **Tool Execution & CLI Fallbacks**: Added support for `traffic-status set <green|yellow|red> [MSG]` alongside direct state commands (`traffic-status <green|yellow|red> [MSG]`) for seamless integration across all AI coding agent skills and plugins.
+- **Universal Agent Skill Guidelines**: Updated `/traffic` slash commands and skill instructions across OpenCode, Qoder, Codex, Antigravity, and Claude Code to enforce active lifecycle transitions.
+
 ## [0.2.1] - 2026-10-30
 
 ### Fixed
