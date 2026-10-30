@@ -1,0 +1,646 @@
+/* ============================================================================
+   scroll-craft · landing page
+   Typographic poster grammar. Type is the imagery.
+   Tokens first, then the page's own composition. Nothing here touches a
+   [data-sc-*] mechanism selector or a .sc-stage / .sc-copy box.
+   ========================================================================== */
+
+:root {
+  /* six colour roles, one accent. Cold graphite ground, bone ink. */
+  --sc-canvas:      #0A0B0D;
+  --sc-surface:     #121418;
+  --sc-ink:         #F4F3EE;
+  --sc-ink-soft:    #9AA1A9;
+  --sc-accent:      #FF5A2B;
+  --sc-accent-ink:  #0A0B0D;
+
+  /* Two families: one grotesk for voice and prose, one mono for code, labels
+     and the page's own measurements. Nothing else. */
+  --sc-font-display: "Instrument Sans", system-ui, sans-serif;
+  --sc-font-text:    "Instrument Sans", system-ui, sans-serif;
+  --sc-font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* The paper stop. The close inverts the whole page; the accent needs a
+     second lightness to clear contrast on paper, same hue. */
+  --paper:            #EFEDE6;
+  --paper-ink:        #12130F;
+  --paper-ink-soft:   #4B4E52;
+  --paper-accent:     #B93A10;
+}
+
+/* --------------------------------------------------------------- primitives */
+
+.mark {
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-xs);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+  margin: 0;
+}
+
+.h2 {
+  font-family: var(--sc-font-display);
+  font-weight: 500;
+  font-size: clamp(2.3rem, 9vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.042em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.link {
+  display: inline-block;
+  font-size: var(--sc-t-base);
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.32em;
+  text-decoration-color: color-mix(in oklab, currentColor 45%, transparent);
+  transition: color var(--sc-d-fast) var(--sc-ease-out),
+              text-decoration-color var(--sc-d-fast) var(--sc-ease-out);
+}
+.link:hover { color: var(--sc-accent); text-decoration-color: currentColor; }
+.link:active { transform: translateY(1px); }
+
+/* --------------------------------------------------------------------- hero
+   A two-line sentence at composition scale. Nothing moves on load: the poster
+   is just there, and scroll tightens it a step. */
+
+.hero {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: clamp(1rem, 2.4vh, 1.75rem) var(--sc-gutter) clamp(1.5rem, 4vh, 2.5rem);
+}
+
+.hero__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sc-4);
+  padding-bottom: clamp(1rem, 3vh, 2rem);
+  border-bottom: 1px solid var(--sc-hairline);
+}
+
+.hero__h {
+  align-self: center;
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-weight: 500;
+  font-size: clamp(3.3rem, 12.4vw, 13.5rem);
+  line-height: 0.84;
+  letter-spacing: -0.052em;
+  padding-bottom: 0.06em;
+  transform-origin: 0 100%;
+  transform: scale(calc(1 - var(--sc-p, 0) * 0.055));
+  will-change: transform;
+}
+
+.hero__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--sc-4) clamp(1.5rem, 4vw, 4rem);
+  margin-top: clamp(1.5rem, 4vh, 2.75rem);
+  padding-top: clamp(1rem, 2.4vh, 1.5rem);
+  border-top: 1px solid var(--sc-hairline);
+}
+
+.hero__sub {
+  max-width: 34ch;
+  font-size: var(--sc-t-base);
+  color: var(--sc-ink);
+}
+
+.hero__cta { margin: 0; }
+
+/* the thesis line lives in the turn, where the page explains what scroll is for */
+.turn__thesis {
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+  max-width: 40ch;
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-sm);
+  line-height: 1.7;
+  letter-spacing: 0.015em;
+  color: var(--sc-ink-soft);
+  text-transform: none;
+}
+
+/* ------------------------------------------------------------------- failure
+   Two full-bleed bands, each wiping in from its own edge. */
+
+.act--fail { padding-block: clamp(5rem, 13vh, 11rem); }
+
+.band {
+  max-width: var(--sc-maxw);
+  margin-inline: auto;
+  padding: clamp(0.5rem, 2vh, 1.5rem) var(--sc-gutter);
+  display: grid;
+  gap: clamp(1rem, 2.6vh, 2rem);
+}
+
+.band--b {
+  margin-left: auto;
+  padding-left: clamp(0rem, 18vw, 22rem);
+}
+
+.band .sc-body { max-width: 46ch; }
+
+.band__rule {
+  max-width: var(--sc-maxw);
+  margin: clamp(2rem, 6vh, 4rem) auto;
+}
+
+/* --------------------------------------------------------------------- turn
+   The quietest act. One headline, two paragraphs, air. */
+
+.act--turn { padding-block: clamp(6rem, 17vh, 15rem); }
+
+.h2--turn {
+  font-size: clamp(2.6rem, 8.4vw, 9rem);
+  letter-spacing: -0.048em;
+}
+
+.turn__body {
+  display: grid;
+  gap: var(--sc-5);
+  max-width: 56ch;
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+}
+
+/* ---------------------------------------------------------------- the peak
+   The page draws its own spec sheet over its own type. Every number in here
+   is read off the live layout by audit.js; nothing is authored. */
+
+.audit {
+  /* No position here: .sc-stage is sticky, and a plain `position: relative`
+     on this element would silently out-rank it and un-pin the whole act. The
+     stage is already a positioned box, so the absolute children below are
+     contained by it. */
+  display: grid;
+  align-content: center;
+  padding-inline: var(--sc-gutter);
+}
+
+.audit__label {
+  position: absolute;
+  top: clamp(1.25rem, 3.4vh, 2.5rem);
+  left: var(--sc-gutter);
+  color: var(--sc-accent);
+}
+
+.audit__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, 19rem);
+  align-items: start;
+  gap: clamp(2rem, 7vw, 8rem);
+  width: 100%;
+  max-width: var(--sc-maxw);
+  margin-inline: auto;
+  padding-block: clamp(4rem, 10vh, 7rem);
+}
+
+.audit__col { max-width: 34rem; }
+
+.audit__head { position: relative; }
+
+.audit__h {
+  font-size: clamp(1.9rem, 7.4vw, 4.4rem);
+  letter-spacing: -0.045em;
+}
+
+.audit__measured {
+  position: relative;
+  margin-top: clamp(1.5rem, 3.5vh, 2.5rem);
+  margin-bottom: 4.4rem;
+}
+
+.audit__para {
+  max-width: 46ch;
+  color: var(--sc-ink-soft);
+}
+
+.audit__end {
+  position: absolute;
+  left: var(--sc-gutter);
+  bottom: clamp(1.25rem, 3.4vh, 2.5rem);
+  margin: 0;
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-sm);
+  line-height: 1.6;
+  letter-spacing: 0.005em;
+  color: var(--sc-ink);
+}
+
+.audit__side {
+  display: flex;
+  justify-content: flex-end;
+  /* the plate closes the diagonal: h2, then the bracket under the paragraph,
+     then the contrast it was measured against, down and to the right */
+  align-self: stretch;
+  align-items: flex-end;
+}
+
+/* annotation geometry: hairlines in the accent, numbers read off the browser */
+
+.anno {
+  --a: 0;
+  position: absolute;
+  z-index: 3;
+  color: var(--sc-accent);
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-xs);
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  clip-path: inset(0 calc((1 - var(--a)) * 100%) 0 0);
+  opacity: clamp(0, calc((0.97 - var(--sc-p, 0)) / 0.09), 1);
+}
+
+.anno__lab { display: inline-flex; align-items: baseline; gap: 0.45em; white-space: nowrap; }
+.anno__v { color: var(--sc-accent); font-weight: 500; }
+.anno__k { color: var(--sc-ink-soft); text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* tracking callout, sitting on the display line it measured */
+.anno--track {
+  --a: clamp(0, calc((var(--sc-p, 0) - 0.44) / 0.12), 1);
+  left: 0;
+  bottom: calc(100% + 0.35rem);
+}
+.anno__tick {
+  display: block;
+  width: 1px;
+  height: 0.6rem;
+  margin-bottom: 0.35rem;
+  background: currentColor;
+}
+
+/* measure bracket, hanging under the paragraph it measured */
+.anno--measure {
+  --a: clamp(0, calc((var(--sc-p, 0) - 0.26) / 0.12), 1);
+  inset: auto 0 auto 0;
+  top: calc(100% + 1.9rem);
+  height: 2.4rem;
+}
+.anno__bracket {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0.85rem;
+  border: 1px solid currentColor;
+  border-bottom: 0;
+}
+.anno--measure .anno__lab { position: absolute; top: 1.35rem; left: 0; }
+
+/* contrast plate, a swatch pair and the ratio computed from them */
+.anno--contrast {
+  --a: clamp(0, calc((var(--sc-p, 0) - 0.6) / 0.12), 1);
+  position: static;
+  width: min(19rem, 100%);
+  padding-top: var(--sc-4);
+  border-top: 1px solid var(--sc-hairline-strong);
+}
+
+.plate__row {
+  display: grid;
+  grid-template-columns: 11px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sc-3);
+  padding-block: 0.6rem;
+  border-bottom: 1px solid var(--sc-hairline);
+}
+.plate__row--ratio {
+  /* two cells, not three: this row has no swatch, and inheriting the swatch
+     column above it puts the label in an 11px track and the value on top of it */
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sc-3);
+  border-bottom: 0;
+  padding-top: var(--sc-4);
+}
+.anno__v--big { font-size: var(--sc-t-lg); letter-spacing: -0.01em; }
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: var(--sc-edge);
+  background: var(--sc-surface);
+}
+
+/* -------------------------------------------------------------------- range
+   Eight grammars, travelling sideways. */
+
+.pan { display: flex; align-items: center; }
+
+.rail {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 4.5vw, 5rem);
+  padding-inline: var(--sc-gutter);
+}
+
+.rail__lead { width: clamp(16rem, 25vw, 25rem); flex: none; }
+.rail__lead .h2 { font-size: clamp(2.1rem, 3.6vw, 3.4rem); letter-spacing: -0.04em; }
+.rail__lead .sc-body { margin-top: var(--sc-5); max-width: 30ch; }
+
+.gram {
+  width: clamp(15rem, 22vw, 20rem);
+  flex: none;
+  padding-top: var(--sc-4);
+  border-top: 1px solid var(--sc-hairline-strong);
+}
+
+.gram__n {
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-weight: 500;
+  font-size: clamp(1.35rem, 2.4vw, 2.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.gram__f {
+  margin: var(--sc-5) 0 0;
+  max-width: 26ch;
+  font-size: var(--sc-t-sm);
+  line-height: 1.6;
+  color: var(--sc-ink-soft);
+}
+
+.gram--this { border-top-color: var(--sc-accent); }
+.gram--this .gram__n { color: var(--sc-accent); }
+.gram--this .gram__f { color: var(--sc-ink); }
+
+.rail__end {
+  width: clamp(14rem, 19vw, 18rem);
+  flex: none;
+  align-self: flex-end;
+  padding-bottom: clamp(2rem, 8vh, 5rem);
+  border-top: 1px solid var(--sc-hairline);
+  padding-top: var(--sc-4);
+}
+.rail__end .sc-body { font-size: var(--sc-t-sm); max-width: 28ch; }
+
+/* ------------------------------------------------------------------ refusal */
+
+.act--refuse { padding-block: clamp(5rem, 13vh, 11rem); }
+
+.refuse__head { padding-bottom: clamp(1.5rem, 4vh, 2.5rem); }
+
+.refuse__band {
+  padding: clamp(1.5rem, 4vh, 3rem) var(--sc-gutter);
+  border-block: 1px solid var(--sc-hairline);
+}
+
+.refuse {
+  max-width: var(--sc-maxw);
+  margin-inline: auto;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(1.5rem, 5vw, 5rem);
+}
+
+.refuse li {
+  padding-block: 0.55em;
+  border-bottom: 1px solid var(--sc-hairline);
+  font-family: var(--sc-font-display);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.9vw, 1.7rem);
+  letter-spacing: -0.02em;
+  color: var(--sc-ink-soft);
+}
+
+.approve { margin-top: clamp(3rem, 8vh, 6rem); }
+
+.approve__h {
+  margin: 0 0 var(--sc-5);
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-xs);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+}
+
+.approve__names {
+  max-width: 62ch;
+  font-size: var(--sc-t-lg);
+  line-height: 1.5;
+  letter-spacing: -0.015em;
+  color: var(--sc-ink);
+}
+
+.approve .sc-body + .sc-body { margin-top: var(--sc-5); max-width: 52ch; }
+
+/* ------------------------------------------------------------------ install */
+
+.act--install { padding-block: clamp(5rem, 12vh, 10rem); }
+
+.act--install .h2 { font-size: clamp(2rem, 3.6vw, 3.2rem); letter-spacing: -0.035em; }
+
+.ways {
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  border-top: 1px solid var(--sc-hairline-strong);
+}
+
+.way {
+  display: grid;
+  grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr);
+  gap: var(--sc-3) clamp(1.5rem, 5vw, 5rem);
+  padding-block: clamp(1.5rem, 3.5vh, 2.25rem);
+  border-bottom: 1px solid var(--sc-hairline);
+}
+
+.way__h {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-weight: 500;
+  font-size: var(--sc-t-base);
+  letter-spacing: -0.01em;
+  color: var(--sc-ink);
+}
+
+.way .code,
+.way .way__n { grid-column: 2; }
+
+.code {
+  margin: 0;
+  padding: var(--sc-4) var(--sc-5);
+  background: var(--sc-surface);
+  border: 1px solid var(--sc-hairline);
+  border-radius: var(--sc-r-sm);
+  box-shadow: var(--sc-e1);
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-sm);
+  line-height: 1.75;
+  color: var(--sc-ink);
+  overflow-x: auto;
+}
+
+.code code { font: inherit; }
+
+.way__n {
+  margin: 0;
+  max-width: 54ch;
+  font-size: var(--sc-t-sm);
+  line-height: 1.62;
+  color: var(--sc-ink-soft);
+}
+
+.inline {
+  font-family: var(--sc-font-mono);
+  font-size: 0.92em;
+  padding: 0.1em 0.36em;
+  border: 1px solid var(--sc-hairline);
+  border-radius: 4px;
+  color: var(--sc-ink);
+}
+
+.spec {
+  margin: clamp(3rem, 7vh, 5rem) 0 0;
+  border-top: 1px solid var(--sc-hairline-strong);
+}
+
+.spec__row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr);
+  gap: var(--sc-3) clamp(1.5rem, 5vw, 5rem);
+  padding-block: var(--sc-4);
+  border-bottom: 1px solid var(--sc-hairline);
+}
+
+.spec dt {
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sc-ink);
+}
+
+.spec dd {
+  margin: 0;
+  max-width: 54ch;
+  font-size: var(--sc-t-sm);
+  line-height: 1.62;
+  color: var(--sc-ink-soft);
+}
+
+.limits { margin-top: clamp(3rem, 7vh, 5rem); max-width: 54ch; }
+
+.limits__h {
+  margin: 0 0 var(--sc-4);
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-xs);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+}
+
+/* -------------------------------------------------------------------- close
+   The inversion. Paper, the quietest type on the page, one underlined link. */
+
+.act--close {
+  background: var(--paper);
+  --sc-ink: var(--paper-ink);
+  --sc-ink-soft: var(--paper-ink-soft);
+  --sc-accent: var(--paper-accent);
+  color: var(--sc-ink);
+}
+
+.close {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: clamp(2.5rem, 7vh, 5rem) var(--sc-gutter) clamp(1.5rem, 4vh, 2.5rem);
+}
+
+.close__inner { align-self: center; max-width: 30rem; }
+
+.close__h {
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 6.6vw, 5.8rem);
+  line-height: 0.92;
+  letter-spacing: -0.048em;
+  text-wrap: balance;
+}
+
+.close__p {
+  margin: var(--sc-5) 0 0;
+  max-width: 34ch;
+  font-size: var(--sc-t-base);
+  line-height: 1.62;
+  color: var(--sc-ink-soft);
+}
+
+.close__link { margin: var(--sc-6) 0 0; }
+.close__link .link { font-size: var(--sc-t-base); }
+
+.close__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sc-2) var(--sc-4);
+  padding-top: var(--sc-4);
+  border-top: 1px solid var(--sc-hairline);
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+}
+
+/* ---------------------------------------------------------------- responsive */
+
+@media (max-width: 900px) {
+  .rail__end { align-self: center; padding-bottom: 0; }
+}
+
+@media (max-width: 860px) {
+  /* The hero steps down a rung of the ramp so the two-line lockup survives on
+     a phone instead of ragging into three. 16vw is the widest setting where
+     "Same page." still clears the gutter at 320px. */
+  .hero__h { font-size: clamp(2.9rem, 16vw, 7.5rem); }
+
+  .audit__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sc-5);
+    padding-block: clamp(3rem, 9vh, 5rem);
+  }
+  .audit__side { justify-content: flex-start; }
+  .anno--contrast { width: min(19rem, 100%); }
+
+  .rail__lead { width: 74vw; }
+  .gram { width: 68vw; }
+  .rail__end { width: 72vw; }
+  .gram__f { max-width: 34ch; }
+
+  .way,
+  .spec__row { grid-template-columns: minmax(0, 1fr); }
+  .way__h,
+  .way .code,
+  .way .way__n { grid-column: 1; }
+  .way__h { grid-row: auto; margin-bottom: 0.25rem; }
+}
+
+@media (max-width: 700px) {
+  .band--b { padding-left: var(--sc-gutter); }
+  .refuse { grid-template-columns: minmax(0, 1fr); }
+  .h2--turn { font-size: clamp(2.3rem, 11vw, 4rem); }
+}
+
+/* ------------------------------------------------------------ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  /* The annotations still hold their meaning; only the drawing goes. */
+  .anno { clip-path: none; opacity: 1; }
+  .hero__h { transform: none; }
+  .link:active { transform: none; }
+}

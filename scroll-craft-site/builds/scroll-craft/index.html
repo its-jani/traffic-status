@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>scroll-craft · an agent skill for scroll-driven sites</title>
+<meta name="description" content="An agent skill for building premium, scroll-driven websites, with a design standard and a browser that checks it. Works with Claude Code, Codex and other coding agents.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230A0B0D'/><rect x='7' y='15' width='18' height='2' fill='%23FF5A2B'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="scrollcraft.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="sc-grain" aria-hidden="true"></div>
+
+<main id="top">
+
+  <!-- 1 · RECOGNITION · pin. The poster holds while the claim tightens. -->
+  <section class="act act--hero" data-sc-act="pin" data-sc-span="2.2" data-sc-drift="#0A0B0D">
+    <div data-sc-stage class="hero">
+      <div class="hero__meta">
+        <span class="mark">scroll-craft</span>
+        <span class="mark hero__meta-r">An agent skill</span>
+      </div>
+
+      <h1 class="hero__h">Same page.<br>Every time.</h1>
+
+      <div class="hero__foot">
+        <p class="hero__sub sc-body" data-sc-cue="0 0.9 0">A skill for building scroll-driven sites that do not look like every other scroll-driven site.</p>
+        <p class="hero__cta"><a class="link" href="https://github.com/nateherkai/scroll-craft">Read the skill</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · TENSION · flow + reveal. Two statements wiping in from opposite edges. -->
+  <section class="act act--fail" data-sc-act="flow" data-sc-drift="#0A0B0D">
+    <div class="band band--a" data-sc-reveal="left" data-sc-reveal-at="0.05 0.44">
+      <h2 class="h2">Well behaved<br>and forgettable.</h2>
+      <p class="sc-body">Nothing on it is broken. Nothing on it is worth remembering either.</p>
+    </div>
+
+    <hr class="sc-rule band__rule">
+
+    <div class="band band--b" data-sc-reveal="right" data-sc-reveal-at="0.44 0.82">
+      <h2 class="h2">Or loud enough<br>to be unreadable.</h2>
+      <p class="sc-body">Body text at 2.1:1, a headline that wraps to six lines on a phone, and the same six sections every other page has.</p>
+    </div>
+  </section>
+
+  <!-- 3 · TURN · flow + kinetic. The quietest act on the page, and the one that turns it. -->
+  <section class="act act--turn" data-sc-act="flow" data-sc-drift="#0C0E12">
+    <div class="sc-wrap turn">
+      <h2 class="h2 h2--turn" data-sc-cue="0.1 0.94 0.22" data-sc-kinetic="lines">One job, not two.</h2>
+      <div class="turn__body" data-sc-in data-sc-stagger="70">
+        <p class="sc-body">Most of this work splits interaction from craft. The motion goes to one pass and the typography to another, and the page arrives with both done to spec and neither done well.</p>
+        <p class="sc-body">scroll-craft scores them together. Before a section exists it writes the feeling you should have in it and the thing on screen that causes it. Then it picks a structure, and the structure forbids things.</p>
+        <p class="turn__thesis">Scroll is the only input every visitor already knows how to use.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · PEAK · pin + the self-measure. The page draws its own spec sheet, then removes it. -->
+  <section class="act act--audit" data-sc-act="pin" data-sc-span="3.6" data-sc-drift="#0B0D11">
+    <div data-sc-stage class="audit" data-audit>
+      <div class="audit__inner">
+        <div class="audit__col">
+          <p class="mark audit__label" data-sc-cue="0 0.22 0" data-audit-label>Verify</p>
+
+          <div class="audit__head">
+            <span class="anno anno--track">
+              <span class="anno__tick" aria-hidden="true"></span>
+              <span class="anno__lab"><span class="anno__k">tracking</span> <span class="anno__v" data-audit-out="track">0</span></span>
+            </span>
+            <h2 class="h2 audit__h" data-sc-cue="0.02 0.99 0.18 0.06">It checks<br>its own work.</h2>
+          </div>
+
+          <div class="audit__measured">
+            <p class="sc-body audit__para" data-audit-para data-sc-cue="0 0.99 0 0.08">A headless browser walks the finished page at every scroll position, waits for the playhead to settle, and reports what the eye would have missed: dead scroll, cues that never reach full opacity, contrast measured on the composited page, a clip that silently never decoded.</p>
+
+            <span class="anno anno--measure">
+              <span class="anno__bracket" aria-hidden="true"></span>
+              <span class="anno__lab"><span class="anno__v" data-audit-out="ch">0</span> <span class="anno__k">over <span data-audit-out="lines">0</span> lines</span></span>
+            </span>
+          </div>
+        </div>
+
+        <aside class="audit__side">
+          <div class="anno anno--contrast plate">
+            <div class="plate__row">
+              <span class="dot" data-audit-swatch="ground" aria-hidden="true"></span>
+              <span class="anno__k">ground</span>
+              <span class="anno__v" data-audit-out="bghex">0</span>
+            </div>
+            <div class="plate__row">
+              <span class="dot" data-audit-swatch="ink" aria-hidden="true"></span>
+              <span class="anno__k">body ink</span>
+              <span class="anno__v" data-audit-out="inkhex">0</span>
+            </div>
+            <div class="plate__row plate__row--ratio">
+              <span class="anno__k">contrast</span>
+              <span class="anno__v anno__v--big" data-audit-out="ratio">0:1</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <p class="audit__end" data-sc-cue="0.52 1 0.1 0.08">Measured, not asserted.</p>
+    </div>
+  </section>
+
+  <!-- 5 · RANGE · pan. Eight grammars travelling sideways. -->
+  <section class="act act--grammars" data-sc-act="pan" data-sc-span="2.2" data-sc-drift="#0A0B0D">
+    <div data-sc-stage class="pan">
+      <div class="rail" data-sc-pan="0.05">
+        <div class="rail__lead">
+          <h2 class="h2">Eight grammars.</h2>
+          <p class="sc-body">One is chosen before anything is built. Each one forbids what the others require, so two builds cannot quietly converge.</p>
+        </div>
+
+        <article class="gram">
+          <h3 class="gram__n">Filmic<br>one-shot</h3>
+          <p class="gram__f">Forbids visible sequence. No chapter numbers, no index, no progress readout.</p>
+        </article>
+
+        <article class="gram">
+          <h3 class="gram__n">Chaptered<br>editorial</h3>
+          <p class="gram__f">Forbids the full-bleed scrub hero. Media never bleeds under type.</p>
+        </article>
+
+        <article class="gram">
+          <h3 class="gram__n">Live<br>surface</h3>
+          <p class="gram__f">Forbids marketing chrome. No wordmark and CTA bar, no display-scale heading.</p>
+        </article>
+
+        <article class="gram">
+          <h3 class="gram__n">Continuous<br>world</h3>
+          <p class="gram__f">Forbids section boundaries. The only element in flow is the spacer.</p>
+        </article>
+
+        <article class="gram gram--this">
+          <h3 class="gram__n">Typographic<br>poster</h3>
+          <p class="gram__f">Forbids photographic ground, cards, and decorative motion.</p>
+        </article>
+
+        <article class="gram">
+          <h3 class="gram__n">Gallery,<br>catalog</h3>
+          <p class="gram__f">Forbids a single hero claim. Every object takes the same label schema.</p>
+        </article>
+
+        <article class="gram">
+          <h3 class="gram__n">Split<br>stage</h3>
+          <p class="gram__f">Forbids full-bleed anything before the resolve.</p>
+        </article>
+
+        <article class="gram">
+          <h3 class="gram__n">Rhythmic<br>cutlist</h3>
+          <p class="gram__f">Forbids pinning. No act over about 1.4 viewport-heights.</p>
+        </article>
+
+        <div class="rail__end">
+          <p class="sc-body">The one in front of you was chosen because the subject is a set of structures, not a place.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · REFUSAL · flow + reveal band, then the names settle. -->
+  <section class="act act--refuse" data-sc-act="flow" data-sc-drift="#0C0D10">
+    <div class="sc-wrap refuse__head">
+      <h2 class="h2">It refuses.</h2>
+    </div>
+
+    <div class="refuse__band" data-sc-reveal="up" data-sc-reveal-at="0.08 0.46">
+      <ul class="refuse">
+        <li>Identical feature-card grids</li>
+        <li>Three equal columns</li>
+        <li>01 / 06 counters</li>
+        <li>Scroll cues</li>
+        <li>Gradient text</li>
+        <li>Neon glow</li>
+        <li>Em dashes</li>
+        <li>Invented statistics</li>
+        <li>Fake dashboards</li>
+        <li>Violet gradients</li>
+        <li>Cream and brass</li>
+        <li>Clay dioramas</li>
+      </ul>
+    </div>
+
+    <div class="sc-wrap approve" data-sc-in data-sc-stagger="60">
+      <h3 class="approve__h">What it approved</h3>
+      <p class="sc-body approve__names">The 0.3.0 rebuild: AI Automation Society, PERKFORM, Glaido, Herkules Advisory, Serein, FORME, Pelagic, NOEMA, OFFGRID, Afterhours.</p>
+      <p class="sc-body">Ten finished sites, ten different structures, none of them sharing a skeleton. The examples are in the repository.</p>
+    </div>
+  </section>
+
+  <!-- 7 · INSTALL · flow + in. Administrative, compressed. -->
+  <section class="act act--install" data-sc-act="flow" data-sc-drift="#0A0B0D">
+    <div class="sc-wrap">
+      <h2 class="h2" data-sc-in>Three ways in.</h2>
+
+      <div class="ways" data-sc-in data-sc-stagger="70">
+        <div class="way">
+          <h3 class="way__h">Claude Code plugin</h3>
+          <pre class="code"><code>/plugin marketplace add nateherkai/scroll-craft
+/plugin install nateherk-design</code></pre>
+          <p class="way__n">Then describe the page you want, or call the skill directly.</p>
+        </div>
+
+        <div class="way">
+          <h3 class="way__h">Any coding agent</h3>
+          <pre class="code"><code>Read plugins/nateherk-design/skills/
+scroll-craft/SKILL.md and use it
+to build my website.</code></pre>
+          <p class="way__n">Point the agent at the skill folder and it follows the referenced workflow.</p>
+        </div>
+
+        <div class="way">
+          <h3 class="way__h">Codex</h3>
+          <p class="way__n way__n--first">Copy the complete scroll-craft folder into your project's <code class="inline">.agents/skills/</code> directory, then ask for the skill by name. Keep the references, scripts and engine with it.</p>
+        </div>
+      </div>
+
+      <dl class="spec" data-sc-in>
+        <div class="spec__row">
+          <dt>Runtime</dt>
+          <dd>Node 18 or newer, for every script in the folder</dd>
+        </div>
+        <div class="spec__row">
+          <dt>Encoding</dt>
+          <dd>A full ffmpeg build, so clips scrub instead of play. The preflight finds one or names what is missing</dd>
+        </div>
+        <div class="spec__row">
+          <dt>Verification</dt>
+          <dd>playwright-core and Chrome, installed in the build folder, for the scroll pass</dd>
+        </div>
+        <div class="spec__row">
+          <dt>Imagery</dt>
+          <dd>Optional key, and only if you want assets generated. Your own photos and footage cost nothing</dd>
+        </div>
+      </dl>
+
+      <div class="limits" data-sc-in>
+        <h3 class="limits__h">Stated limits</h3>
+        <p class="sc-body">It has only ever been run on Windows. Generated video is a real spend. And it is opinionated on purpose: it will refuse the layouts that make AI pages recognisable, and it will argue with you about your peak.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · RESOLVE · pin, hold cue, the ground inverts to paper and the page stops. -->
+  <section class="act act--close" data-sc-act="pin" data-sc-span="1.2">
+    <div data-sc-stage class="close">
+      <div class="close__inner">
+        <h2 class="close__h" data-sc-cue="0.04">Different<br>every time.</h2>
+        <p class="close__p" data-sc-cue="0.04">An agent skill for scroll-driven sites, with a design standard and a browser that checks it.</p>
+        <p class="close__link"><a class="link link--close" href="https://github.com/nateherkai/scroll-craft" data-sc-cue="0.04">Read the skill</a></p>
+      </div>
+      <footer class="close__foot">
+        <span>This page was built with it</span>
+        <span>scroll-craft 0.3.0</span>
+        <span>MIT licensed</span>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<script src="scrollcraft.js"></script>
+<script src="audit.js"></script>
+<script>ScrollCraft.mount(document.body);</script>
+</body>
+</html>
