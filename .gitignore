@@ -11,8 +11,8 @@ release-assets/
 # Tool outputs & analysis
 /graphify-out/
 
-# scroll-craft build workspace (local only): scroll-pass frames and contact sheets
-scroll-craft-site/builds/scroll-craft/lab/**/*.png
+# scroll-craft build workspace (local only): scroll-pass lab artifacts
+scroll-craft-site/builds/scroll-craft/lab/**
 
 # Node & npm artifacts
 node_modules/
