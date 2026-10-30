@@ -1,0 +1,48 @@
+name: Deploy Landing Page to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+    # Only redeploy when the landing page sources actually change; the rest of
+    # the repository (Rust crate, npm packaging) has no bearing on the site.
+    paths:
+      - "scroll-craft-site/builds/scroll-craft/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two Pages deployments at once: the second would be rejected
+# because the environment only allows a single concurrent deployment.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+
+      # Only tracked files reach the runner, so gitignored artifacts (lab
+      # screenshots, node_modules) stay out of the published site.
+      - name: Upload static site artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: scroll-craft-site/builds/scroll-craft
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
