@@ -5,8 +5,13 @@
    visitor reads here was computed from the rendered page at this viewport: the
    measure is the paragraph's real width divided by the real advance of a "0" in
    its own face, the line count comes from its box height over its leading, the
-   tracking is the computed letter-spacing in em, and the ratio is WCAG contrast
-   between the resolved body ink and the ground this act actually paints.
+   tracking is the computed letter-spacing in em, the lamp diameter is the lens
+   box as laid out, and every ratio is WCAG contrast between two colours the
+   browser resolved.
+
+   The three lamp ratios are the argument of the act: the widget's own colours
+   measured against the housing they are read on, so the states are not claimed
+   to be legible, they are shown to be.
 
    Nothing is authored, and nothing here touches the engine.
    ========================================================================== */
@@ -19,8 +24,12 @@
 
   var act = root.closest('[data-sc-act]');
   var para = root.querySelector('[data-audit-para]');
-  var head = root.querySelector('.audit__h');
-  if (!act || !para || !head) return;
+  var head = root.querySelector('.states__h');
+  var lamp = root.querySelector('.lamp');
+  if (!act || !para || !head || !lamp) return;
+
+  // DOM order inside the housing is red, amber, green.
+  var lenses = root.querySelectorAll('.lamp--live .lamp__led');
 
   var out = function (key) {
     return root.querySelector('[data-audit-out="' + key + '"]');
@@ -49,7 +58,10 @@
     m = value.match(/rgba?\(([^)]+)\)/i);
     if (m) {
       var parts = m[1].split(/[,\s/]+/).filter(Boolean).map(parseFloat);
-      if (parts.length >= 3) return [parts[0], parts[1], parts[2]];
+      // A fully transparent surface has no colour to measure against.
+      if (parts.length >= 3 && (parts.length < 4 || parts[3] > 0)) {
+        return [parts[0], parts[1], parts[2]];
+      }
     }
     return null;
   }
@@ -130,6 +142,31 @@
       if (dotGround) dotGround.style.background = hex(ground);
       if (dotInk) dotInk.style.background = hex(ink);
     }
+
+    // ---- the lamps --------------------------------------------------------
+
+    var housing = parseColor(getComputedStyle(lamp).backgroundColor);
+    var keys = ['attn', 'working', 'ready'];
+
+    if (lenses.length) {
+      set('led', Math.round(lenses[0].getBoundingClientRect().width) + ' px');
+    }
+
+    if (!housing) return;
+
+    Array.prototype.forEach.call(lenses, function (led, i) {
+      var key = keys[i];
+      if (!key) return;
+      var colour = parseColor(getComputedStyle(led).backgroundColor);
+      if (!colour) return;
+
+      // The lens is measured at full brightness: the plate is a spec for the
+      // state, not a reading of whichever lamp the scroll happens to be on.
+      set('ratio-' + key, ratio(colour, housing).toFixed(1) + ':1');
+
+      var dot = root.querySelector('[data-audit-swatch="' + key + '"]');
+      if (dot) dot.style.background = hex(colour);
+    });
   }
 
   // Fonts change the advance of a "0", so the run happens after the faces land.

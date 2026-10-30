@@ -1,18 +1,22 @@
 /* ============================================================================
-   scroll-craft · landing page
-   Typographic poster grammar. Type is the imagery.
-   Tokens first, then the page's own composition. Nothing here touches a
-   [data-sc-*] mechanism selector or a .sc-stage / .sc-copy box.
+   traffic-status · landing page
+   Typographic poster grammar, with the product drawn in CSS: the widget is a
+   capsule housing, three visor cowls and three dotted LED lens. Type carries
+   the voice; the light carries the evidence.
+
+   Nothing here touches a [data-sc-*] mechanism selector or a .sc-stage /
+   .sc-copy box. The three lamp colours are content, not chrome: they are the
+   subject of the page. The chrome accent is the ready lamp, used alone.
    ========================================================================== */
 
 :root {
   /* six colour roles, one accent. Cold graphite ground, bone ink. */
-  --sc-canvas:      #0A0B0D;
-  --sc-surface:     #121418;
-  --sc-ink:         #F4F3EE;
-  --sc-ink-soft:    #9AA1A9;
-  --sc-accent:      #FF5A2B;
-  --sc-accent-ink:  #0A0B0D;
+  --sc-canvas:      #0A0C10;
+  --sc-surface:     #12151A;
+  --sc-ink:         #F2F1EC;
+  --sc-ink-soft:    #9BA1A8;
+  --sc-accent:      #35D07A;
+  --sc-accent-ink:  #06120B;
 
   /* Two families: one grotesk for voice and prose, one mono for code, labels
      and the page's own measurements. Nothing else. */
@@ -20,12 +24,19 @@
   --sc-font-text:    "Instrument Sans", system-ui, sans-serif;
   --sc-font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
+  /* the hardware. --housing is the capsule the lamps are read against, so it
+     is the colour the contrast plate measures them on. */
+  --lamp-ready:   #2FCC6E;
+  --lamp-working: #F2A33C;
+  --lamp-attn:    #E5484D;
+  --housing:      #191D23;
+
   /* The paper stop. The close inverts the whole page; the accent needs a
-     second lightness to clear contrast on paper, same hue. */
+     second lightness to clear contrast on paper, same hue family. */
   --paper:            #EFEDE6;
   --paper-ink:        #12130F;
   --paper-ink-soft:   #4B4E52;
-  --paper-accent:     #B93A10;
+  --paper-accent:     #1B7A45;
 }
 
 /* --------------------------------------------------------------- primitives */
@@ -64,9 +75,142 @@
 .link:hover { color: var(--sc-accent); text-decoration-color: currentColor; }
 .link:active { transform: translateY(1px); }
 
+/* ------------------------------------------------------------ the widget
+   One drawing, used twice: parked in the hero at rest, and cycling through
+   the three states in the peak. Every dimension is a ratio of --lamp-w, so
+   the whole object scales from a phone to a 4K monitor without new numbers.
+
+   The unlit lens is not black: a real lamp still catches light on the rim, so
+   the unlit state keeps 16% of the lens colour and the lit state takes it to
+   full. That difference is what makes the light read as a state and not as an
+   icon. */
+
+.lamp {
+  --lamp-w: clamp(5rem, 12vh, 9rem);
+  --lamp-pad: calc(var(--lamp-w) * 0.115);
+
+  position: relative;
+  width: var(--lamp-w);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lamp-w) * 0.055);
+  /* the block padding is where the two hardware screws live */
+  padding: calc(var(--lamp-w) * 0.235) var(--lamp-pad);
+  border-radius: calc(var(--lamp-w) * 0.5);
+  background-color: var(--housing);
+  background-image: linear-gradient(100deg,
+    color-mix(in oklab, #fff 10%, transparent) 0%,
+    transparent 20%,
+    transparent 66%,
+    color-mix(in oklab, #000 42%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, #fff 18%, transparent),
+    inset 1px 0 1px color-mix(in oklab, #fff 7%, transparent),
+    inset -1px 0 1px color-mix(in oklab, #000 55%, transparent),
+    inset 0 -2px 4px color-mix(in oklab, #000 60%, transparent),
+    0 1px 1px color-mix(in oklab, #000 55%, transparent),
+    0 14px 30px -10px color-mix(in oklab, #000 80%, transparent),
+    0 44px 80px -40px color-mix(in oklab, #000 90%, transparent);
+}
+
+.lamp__screw {
+  position: absolute;
+  left: 50%;
+  width: calc(var(--lamp-w) * 0.062);
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, #3A424C 0%, #101317 76%);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 22%, transparent),
+              0 1px 1px color-mix(in oklab, #000 70%, transparent);
+}
+.lamp__screw--t { top: calc(var(--lamp-w) * 0.085); }
+.lamp__screw--b { bottom: calc(var(--lamp-w) * 0.085); }
+.lamp__screw::before {
+  content: "";
+  position: absolute;
+  inset: 44% 16%;
+  border-radius: 1px;
+  background: color-mix(in oklab, #000 72%, transparent);
+}
+
+.lamp__u {
+  --lit: 0;
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.lamp__u--r { --led: var(--lamp-attn); }
+.lamp__u--y { --led: var(--lamp-working); }
+.lamp__u--g { --led: var(--lamp-ready); }
+
+/* the cone the lens is seated in */
+.lamp__u::before {
+  content: "";
+  position: absolute;
+  inset: -3%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 6%, #2E353E 0%, #0B0E12 70%);
+  box-shadow:
+    inset 0 2px 4px color-mix(in oklab, #000 85%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, #fff 6%, transparent),
+    0 0 0 1px color-mix(in oklab, #000 60%, transparent);
+}
+
+.lamp__led {
+  position: absolute;
+  inset: 3%;
+  border-radius: 50%;
+  z-index: 1;
+  background-color: var(--led);
+  opacity: calc(0.16 + var(--lit) * 0.84);
+  box-shadow:
+    inset 0 -3px 8px color-mix(in oklab, #000 45%, transparent),
+    inset 0 2px 3px color-mix(in oklab, #fff 14%, transparent),
+    0 0 calc(var(--lamp-w) * 0.3 * var(--lit))
+      color-mix(in oklab, var(--led) 52%, transparent);
+  transition: opacity var(--sc-d-base) var(--sc-ease-out),
+              box-shadow var(--sc-d-base) var(--sc-ease-out);
+}
+
+/* the emitter matrix: one dot per tile, brightest where the lens is lit. Kept
+   small and low-contrast, or the lens reads as a pattern instead of a light. */
+.lamp__led::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: radial-gradient(circle at 50% 50%,
+    color-mix(in oklab, #fff 52%, transparent) 0 9%,
+    transparent 12%);
+  background-size: 11.112% 11.112%;
+  opacity: calc(0.2 + var(--lit) * 0.26);
+}
+
+/* the visor: a dome over the lens, throwing its shadow down onto it */
+.lamp__u::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: -8%;
+  right: -8%;
+  top: -8%;
+  height: 43%;
+  border-radius: 50% 50% 46% 46% / 100% 100% 34% 34%;
+  background: linear-gradient(178deg, #2B323B 0%, #1C222A 46%, #0E1115 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, #fff 16%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, #000 70%, transparent),
+    0 7px 12px -5px color-mix(in oklab, #000 85%, transparent),
+    0 15px 20px -12px color-mix(in oklab, #000 70%, transparent);
+}
+
+/* rest state in the hero: the ready lamp only */
+.lamp--static .lamp__u--g { --lit: 1; }
+
 /* --------------------------------------------------------------------- hero
-   A two-line sentence at composition scale. Nothing moves on load: the poster
-   is just there, and scroll tightens it a step. */
+   A two-line sentence at composition scale, with the object itself beside it.
+   Nothing moves on load: the poster is just there, and scroll tightens it. */
 
 .hero {
   display: grid;
@@ -83,12 +227,19 @@
   border-bottom: 1px solid var(--sc-hairline);
 }
 
+.hero__mid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  min-height: 0;
+}
+
 .hero__h {
-  align-self: center;
   margin: 0;
   font-family: var(--sc-font-display);
   font-weight: 500;
-  font-size: clamp(3.3rem, 12.4vw, 13.5rem);
+  font-size: clamp(3.1rem, 11.6vw, 12.5rem);
   line-height: 0.84;
   letter-spacing: -0.052em;
   padding-bottom: 0.06em;
@@ -96,6 +247,11 @@
   transform: scale(calc(1 - var(--sc-p, 0) * 0.055));
   will-change: transform;
 }
+
+/* The size lives on the lamp itself: a --lamp-w set on the wrapper would be
+   overridden by the .lamp rule below, which is the element's own declaration. */
+.hero__lamp { justify-self: end; }
+.hero__lamp .lamp { --lamp-w: clamp(5.5rem, 15vh, 11rem); }
 
 .hero__foot {
   display: flex;
@@ -109,29 +265,28 @@
 }
 
 .hero__sub {
-  max-width: 34ch;
+  max-width: 46ch;
   font-size: var(--sc-t-base);
   color: var(--sc-ink);
 }
 
 .hero__cta { margin: 0; }
 
-/* the thesis line lives in the turn, where the page explains what scroll is for */
+/* the thesis line lives in the turn, where the page explains what the light is for */
 .turn__thesis {
   margin-top: clamp(2rem, 5vh, 3.5rem);
-  max-width: 40ch;
+  max-width: 46ch;
   font-family: var(--sc-font-mono);
   font-size: var(--sc-t-sm);
   line-height: 1.7;
   letter-spacing: 0.015em;
   color: var(--sc-ink-soft);
-  text-transform: none;
 }
 
-/* ------------------------------------------------------------------- failure
+/* --------------------------------------------------------------------- away
    Two full-bleed bands, each wiping in from its own edge. */
 
-.act--fail { padding-block: clamp(5rem, 13vh, 11rem); }
+.act--away { padding-block: clamp(5rem, 13vh, 11rem); }
 
 .band {
   max-width: var(--sc-maxw);
@@ -171,10 +326,11 @@
 }
 
 /* ---------------------------------------------------------------- the peak
-   The page draws its own spec sheet over its own type. Every number in here
-   is read off the live layout by audit.js; nothing is authored. */
+   The page draws its own spec sheet over its own type, and the widget runs
+   its three states off the same scroll progress. Every number in here is read
+   off the live layout by audit.js; nothing is authored. */
 
-.audit {
+.states {
   /* No position here: .sc-stage is sticky, and a plain `position: relative`
      on this element would silently out-rank it and un-pin the whole act. The
      stage is already a positioned box, so the absolute children below are
@@ -184,45 +340,73 @@
   padding-inline: var(--sc-gutter);
 }
 
-.audit__label {
+.states__label {
   position: absolute;
   top: clamp(1.25rem, 3.4vh, 2.5rem);
   left: var(--sc-gutter);
-  color: var(--sc-accent);
+  display: grid;
+  color: var(--lamp-ready);
 }
 
-.audit__inner {
+/* three words stacked in one box; --lit cross-fades them with the lamps */
+.states__label > span {
+  grid-area: 1 / 1;
+  opacity: var(--lit);
+  white-space: nowrap;
+}
+.states__w--g { color: var(--lamp-ready); }
+.states__w--y { color: var(--lamp-working); }
+.states__w--r { color: var(--lamp-attn); }
+
+/* The state curve. One trapezoid per lamp, built from two clamped ramps: the
+   second lamp is the min() of its fade-in and its fade-out, so the light is on
+   only while its own window of the act is under the playhead. */
+.lamp--live .lamp__u--g,
+.states__w--g {
+  --lit: clamp(0, calc((0.34 - var(--sc-p, 0)) / 0.12), 1);
+}
+.lamp--live .lamp__u--y,
+.states__w--y {
+  --lit: min(clamp(0, calc((var(--sc-p, 0) - 0.34) / 0.12), 1),
+             clamp(0, calc((0.7 - var(--sc-p, 0)) / 0.12), 1));
+}
+.lamp--live .lamp__u--r,
+.states__w--r {
+  --lit: clamp(0, calc((var(--sc-p, 0) - 0.7) / 0.12), 1);
+}
+
+.states__inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(13rem, 19rem);
-  align-items: start;
+  align-items: center;
   gap: clamp(2rem, 7vw, 8rem);
   width: 100%;
   max-width: var(--sc-maxw);
   margin-inline: auto;
-  padding-block: clamp(4rem, 10vh, 7rem);
+  padding-block: clamp(3rem, 8vh, 5.5rem);
 }
 
-.audit__col { max-width: 34rem; }
+.states__col { max-width: 34rem; }
 
-.audit__head { position: relative; }
+.states__head { position: relative; }
 
-.audit__h {
+.states__h {
   font-size: clamp(1.9rem, 7.4vw, 4.4rem);
   letter-spacing: -0.045em;
 }
 
-.audit__measured {
+.states__measured {
   position: relative;
   margin-top: clamp(1.5rem, 3.5vh, 2.5rem);
   margin-bottom: 4.4rem;
 }
 
-.audit__para {
+.states__para {
   max-width: 46ch;
   color: var(--sc-ink-soft);
 }
 
-.audit__end {
+.states__end {
   position: absolute;
   left: var(--sc-gutter);
   bottom: clamp(1.25rem, 3.4vh, 2.5rem);
@@ -234,14 +418,15 @@
   color: var(--sc-ink);
 }
 
-.audit__side {
+.states__side {
   display: flex;
-  justify-content: flex-end;
-  /* the plate closes the diagonal: h2, then the bracket under the paragraph,
-     then the contrast it was measured against, down and to the right */
-  align-self: stretch;
+  flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
+  gap: clamp(1.25rem, 3.2vh, 2.25rem);
 }
+
+.states__lamp .lamp { --lamp-w: clamp(4.5rem, 12vh, 7.5rem); }
 
 /* annotation geometry: hairlines in the accent, numbers read off the browser */
 
@@ -264,7 +449,7 @@
 
 /* tracking callout, sitting on the display line it measured */
 .anno--track {
-  --a: clamp(0, calc((var(--sc-p, 0) - 0.44) / 0.12), 1);
+  --a: clamp(0, calc((var(--sc-p, 0) - 0.3) / 0.12), 1);
   left: 0;
   bottom: calc(100% + 0.35rem);
 }
@@ -278,7 +463,7 @@
 
 /* measure bracket, hanging under the paragraph it measured */
 .anno--measure {
-  --a: clamp(0, calc((var(--sc-p, 0) - 0.26) / 0.12), 1);
+  --a: clamp(0, calc((var(--sc-p, 0) - 0.16) / 0.12), 1);
   inset: auto 0 auto 0;
   top: calc(100% + 1.9rem);
   height: 2.4rem;
@@ -292,9 +477,10 @@
 }
 .anno--measure .anno__lab { position: absolute; top: 1.35rem; left: 0; }
 
-/* contrast plate, a swatch pair and the ratio computed from them */
+/* The plate lands before the act's midpoint, so the lamp is never alone on
+   the page: the object and its measurements arrive as one instrument. */
 .anno--contrast {
-  --a: clamp(0, calc((var(--sc-p, 0) - 0.6) / 0.12), 1);
+  --a: clamp(0, calc((var(--sc-p, 0) - 0.4) / 0.12), 1);
   position: static;
   width: min(19rem, 100%);
   padding-top: var(--sc-4);
@@ -306,19 +492,35 @@
   grid-template-columns: 11px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--sc-3);
-  padding-block: 0.6rem;
+  padding-block: 0.5rem;
   border-bottom: 1px solid var(--sc-hairline);
 }
+
+/* rows without a swatch: two cells, not three, or the label lands in the 11px
+   swatch track and the value sits on top of it */
+.plate__row--head,
 .plate__row--ratio {
-  /* two cells, not three: this row has no swatch, and inheriting the swatch
-     column above it puts the label in an 11px track and the value on top of it */
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--sc-3);
-  border-bottom: 0;
-  padding-top: var(--sc-4);
 }
+
+.plate__row--head { border-bottom-color: var(--sc-hairline-strong); }
+
+.plate__row--ratio {
+  padding-top: var(--sc-4);
+  border-bottom: 0;
+}
+
+.plate__pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.plate__row--lamp:last-child { border-bottom: 0; }
+
 .anno__v--big { font-size: var(--sc-t-lg); letter-spacing: -0.01em; }
 
 .dot {
@@ -329,8 +531,8 @@
   background: var(--sc-surface);
 }
 
-/* -------------------------------------------------------------------- range
-   Eight grammars, travelling sideways. */
+/* ------------------------------------------------------------------- range
+   Six integrations, travelling sideways. */
 
 .pan { display: flex; align-items: center; }
 
@@ -345,14 +547,20 @@
 .rail__lead .h2 { font-size: clamp(2.1rem, 3.6vw, 3.4rem); letter-spacing: -0.04em; }
 .rail__lead .sc-body { margin-top: var(--sc-5); max-width: 30ch; }
 
-.gram {
+.agent {
   width: clamp(15rem, 22vw, 20rem);
   flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-4);
+  /* the rail is a thin strip in a tall stage unless the cards carry height:
+     the name and its path read as a label pair, the tag sits on the baseline */
+  min-height: clamp(9rem, 30vh, 14rem);
   padding-top: var(--sc-4);
   border-top: 1px solid var(--sc-hairline-strong);
 }
 
-.gram__n {
+.agent__n {
   margin: 0;
   font-family: var(--sc-font-display);
   font-weight: 500;
@@ -361,25 +569,34 @@
   letter-spacing: -0.035em;
 }
 
-.gram__f {
-  margin: var(--sc-5) 0 0;
-  max-width: 26ch;
+.agent__f {
+  margin: 0;
+  font-family: var(--sc-font-mono);
   font-size: var(--sc-t-sm);
   line-height: 1.6;
+  color: var(--sc-ink);
+  overflow-wrap: anywhere;
+}
+
+.agent__t {
+  margin-top: auto;
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-t-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--sc-ink-soft);
 }
 
-.gram--this { border-top-color: var(--sc-accent); }
-.gram--this .gram__n { color: var(--sc-accent); }
-.gram--this .gram__f { color: var(--sc-ink); }
+.agent--this { border-top-color: var(--sc-accent); }
+.agent--this .agent__n { color: var(--sc-accent); }
 
 .rail__end {
   width: clamp(14rem, 19vw, 18rem);
   flex: none;
   align-self: flex-end;
   padding-bottom: clamp(2rem, 8vh, 5rem);
-  border-top: 1px solid var(--sc-hairline);
   padding-top: var(--sc-4);
+  border-top: 1px solid var(--sc-hairline);
 }
 .rail__end .sc-body { font-size: var(--sc-t-sm); max-width: 28ch; }
 
@@ -434,7 +651,7 @@
   color: var(--sc-ink);
 }
 
-.approve .sc-body + .sc-body { margin-top: var(--sc-5); max-width: 52ch; }
+.approve .sc-body + .sc-body { margin-top: var(--sc-5); max-width: 62ch; }
 
 /* ------------------------------------------------------------------ install */
 
@@ -485,7 +702,9 @@
 
 .code code { font: inherit; }
 
-.way__n {
+.way__n,
+.spec dd,
+.limits .sc-body {
   margin: 0;
   max-width: 54ch;
   font-size: var(--sc-t-sm);
@@ -523,15 +742,9 @@
   color: var(--sc-ink);
 }
 
-.spec dd {
-  margin: 0;
-  max-width: 54ch;
-  font-size: var(--sc-t-sm);
-  line-height: 1.62;
-  color: var(--sc-ink-soft);
-}
+.spec dd { margin: 0; }
 
-.limits { margin-top: clamp(3rem, 7vh, 5rem); max-width: 54ch; }
+.limits { margin-top: clamp(3rem, 7vh, 5rem); max-width: 62ch; }
 
 .limits__h {
   margin: 0 0 var(--sc-4);
@@ -544,7 +757,7 @@
 }
 
 /* -------------------------------------------------------------------- close
-   The inversion. Paper, the quietest type on the page, one underlined link. */
+   The inversion. Paper, the quietest type on the page, three underlined links. */
 
 .act--close {
   background: var(--paper);
@@ -560,7 +773,19 @@
   padding: clamp(2.5rem, 7vh, 5rem) var(--sc-gutter) clamp(1.5rem, 4vh, 2.5rem);
 }
 
-.close__inner { align-self: center; max-width: 30rem; }
+.close__inner {
+  align-self: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+  width: 100%;
+}
+
+.close__text { max-width: 34rem; }
+
+.close__lamp { justify-self: end; }
+.close__lamp .lamp { --lamp-w: clamp(4rem, 8.5vh, 6.25rem); }
 
 .close__h {
   margin: 0;
@@ -580,8 +805,12 @@
   color: var(--sc-ink-soft);
 }
 
-.close__link { margin: var(--sc-6) 0 0; }
-.close__link .link { font-size: var(--sc-t-base); }
+.close__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-3) var(--sc-6);
+  margin: var(--sc-6) 0 0;
+}
 
 .close__foot {
   display: flex;
@@ -605,22 +834,36 @@
 
 @media (max-width: 860px) {
   /* The hero steps down a rung of the ramp so the two-line lockup survives on
-     a phone instead of ragging into three. 16vw is the widest setting where
-     "Same page." still clears the gutter at 320px. */
-  .hero__h { font-size: clamp(2.9rem, 16vw, 7.5rem); }
+     a phone instead of ragging into three. */
+  .hero__h { font-size: clamp(2.6rem, 14.5vw, 7rem); }
+  .hero__mid { grid-template-columns: minmax(0, 1fr); align-content: center; gap: clamp(1rem, 3vh, 2rem); }
+  .hero__lamp { justify-self: start; }
+  .hero__lamp .lamp { --lamp-w: clamp(3.25rem, 9vh, 4.5rem); }
 
-  .audit__inner {
+  .states__inner {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--sc-5);
-    padding-block: clamp(3rem, 9vh, 5rem);
+    padding-block: clamp(2.5rem, 7vh, 4rem);
   }
-  .audit__side { justify-content: flex-start; }
+  .states__h { font-size: clamp(2.1rem, 9.6vw, 3.2rem); }
+  /* side by side, not stacked: the lamp and the plate together are still
+     shorter than the column they replace */
+  .states__side {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--sc-5);
+  }
+  .states__lamp .lamp { --lamp-w: clamp(3rem, 9vh, 4.25rem); }
   .anno--contrast { width: min(19rem, 100%); }
 
   .rail__lead { width: 74vw; }
-  .gram { width: 68vw; }
+  .agent { width: 68vw; min-height: 0; }
   .rail__end { width: 72vw; }
-  .gram__f { max-width: 34ch; }
+
+  .close__inner { grid-template-columns: minmax(0, 1fr); gap: var(--sc-5); }
+  .close__lamp { justify-self: start; }
+  .close__lamp .lamp { --lamp-w: clamp(2.75rem, 6.5vh, 3.5rem); }
 
   .way,
   .spec__row { grid-template-columns: minmax(0, 1fr); }
@@ -636,6 +879,13 @@
   .h2--turn { font-size: clamp(2.3rem, 11vw, 4rem); }
 }
 
+/* A short landscape window cannot hold the hero's headline and the object at
+   the same scale. The headline wins; the widget is still the subject of the
+   peak act, three screens later. */
+@media (max-height: 520px) and (min-width: 861px) {
+  .hero__lamp { display: none; }
+}
+
 /* ------------------------------------------------------------ reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
@@ -643,4 +893,7 @@
   .anno { clip-path: none; opacity: 1; }
   .hero__h { transform: none; }
   .link:active { transform: none; }
+  /* The lamp's state change is information, not decoration, so it stays; only
+     its transition tightens. */
+  .lamp__led { transition-duration: 1ms; }
 }
