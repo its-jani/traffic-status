@@ -1,6 +1,6 @@
 [package]
 name = "traffic-status"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Traffic Status Team"]
 description = "Lightweight, non-Electron floating desktop traffic light for AI coding agents"

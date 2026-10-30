@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-10-30
+
+### Added
+- **Authentic hardware UI redesign**: Polycarbonate capsule housing with beveled rim, cylindrical visor cowls (sun shades), concentric dotted LED emitter matrix, multi-stage ambient bloom halos, and hardware screws — matching real-world traffic light hardware aesthetics.
+- **Multi-CLI agent support**: Slash commands (`/traffic on|off`) now work in Qoder CLI, Codex, Antigravity (AGY/Gemini), Claude Code, and OpenCode via per-project and global hook files.
+- **Project-level BeautifulRust skills**: `rust-best-practices`, `rust-port`, and `rust-review` skills installed at project level (`.agents/skills/`, `.claude/skills/`, `.gemini/skills/`) for AI coding agent quality enforcement.
+
+### Fixed
+- **`/traffic off` now fully terminates the widget**: Previously only dismissed the current session. Now sends `POST /shutdown` to kill the daemon process entirely.
+- **No taskbar icon**: Widget no longer appears in the Windows taskbar (`with_taskbar(false)`).
+- **Default top-right placement**: Widget spawns at the top-right corner of the primary screen with a 28 px margin.
+
+### Changed
+- Window size tuned: 86×236 px (single session) or 118×236 px (multi-session).
+- Yellow breathing pulse animation retained and refined.
+- Hover-activated close/minimize controls (only visible on hover).
+
 ## [0.1.1] - 2026-10-17
 
 ### Fixed
