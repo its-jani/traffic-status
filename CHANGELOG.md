@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-10-30
+
+### Fixed
+- **npm Platform Package Metadata**: Explicitly declared `"publishConfig": { "access": "public" }` in `@its-jani/traffic-status-win32-x64` manifest and `prepare.mjs` generator script to resolve npm OIDC trusted publisher provenance verification.
+- **Repository URL**: Enforced canonical `git+https://github.com/its-jani/traffic-status.git` format across all npm package manifests.
+
 ## [0.2.0] - 2026-10-30
 
 ### Added

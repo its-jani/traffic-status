@@ -168,6 +168,9 @@ function main() {
       files: [plat.bin, "LICENSE", "README.md"],
       license: "MIT",
       author: "Traffic Status Team",
+      publishConfig: {
+        access: "public",
+      },
       repository: {
         type: "git",
         url: "git+https://github.com/its-jani/traffic-status.git",
