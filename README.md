@@ -138,7 +138,7 @@ GET /ping
 ```
 Response:
 ```json
-{"status":"ok","app":"traffic-status","version":"0.1.0"}
+{"status":"ok","app":"traffic-status","version":"0.3.0"}
 ```
 
 ### 2. Update Status Light
