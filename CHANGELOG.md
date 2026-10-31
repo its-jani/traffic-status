@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-31
+
+### Added
+- **Hardware-Faithful UI Overhaul**: Upgraded widget to full 3D visor cowl hardware design matching high-fidelity hardware references and scroll-craft site. Features 72px lamp apertures (36px radius), 80px vertical step spacing, dark-matte capsule housing (`#191D23`), deep cylindrical hood visors with top rim highlights and inner dark lips, fine-grained 9x9 dotted LED matrix grid with active LED cores, smooth 250ms exponential color transition blending between states, and dual-stage ambient bloom halos.
+- **Zero-Friction Automated State Engine**: Fully automated background transitions without manual approval prompts or terminal subshell spawning. The user only ever executes `/traffic on` (to launch/show) and `/traffic off` (to close/terminate).
+- **Silent Background IPC Loopback**: State shifts across all AI coding agents (OpenCode, Qoder CLI, Antigravity/Gemini, Codex, Claude Code) stream silently over local loopback HTTP (`http://127.0.0.1:8765`), eliminating subshell noise (`npx -y`, `2>/dev/null`, piped shells) and CLI security warnings.
+
 ## [0.2.2] - 2026-10-30
 
 ### Fixed
