@@ -1,40 +1,21 @@
 <!-- generated-by: traffic-status -->
 # Traffic Status Slash Command (/traffic)
 
-Execute the corresponding action immediately in 1 step without reading source files or repository searches.
+The desktop floating traffic light runs silently in the background and switches states automatically:
+- 🟢 **GREEN**: Ready and waiting for user input.
+- 🟡 **YELLOW**: Working, generating code, thinking, or running background tools.
+- 🔴 **RED**: Blocked, error encountered, or paused for user confirmation.
 
-### Lifecycle Event Protocol:
-When active, keep the desktop traffic status synced with your state:
-- When starting work, thinking, or invoking tools: run `traffic-status yellow "Working..."`
-- When asking the user for confirmation, permission, or paused: run `traffic-status red "Waiting for user confirmation"`
-- When done and ready for the next prompt: run `traffic-status green "Ready"`
+The user NEVER needs to run manual color commands. State changes happen automatically via silent background IPC over `http://127.0.0.1:8765`.
 
-### Binary Resolution:
-Locate and execute the `traffic-status` binary in this order:
-1. `traffic-status` (if on PATH)
-2. `%LOCALAPPDATA%\traffic-status\bin\traffic-status.exe` (Windows) or `~/.local/share/traffic-status/bin/traffic-status` (macOS/Linux)
-3. `npx -y traffic-status`
-
-### Actions:
+### Usage:
 - **/traffic on** (or **/traffic**):
-  Starts the floating status daemon (if not running) and registers the active session.
+  Launches the floating status daemon (if not running) and registers the active session.
   ```powershell
-  traffic-status on "Antigravity"
-  ```
-- **/traffic yellow [msg]** (when thinking/running tools):
-  ```powershell
-  traffic-status yellow "$ARG"
-  ```
-- **/traffic green [msg]** (when ready/waiting for prompt):
-  ```powershell
-  traffic-status green "$ARG"
-  ```
-- **/traffic red [msg]** (when error/needs confirmation):
-  ```powershell
-  traffic-status red "$ARG"
+  & "$env:LOCALAPPDATA\traffic-status\bin\traffic-status.exe" on "Antigravity"
   ```
 - **/traffic off**:
-  Completely shuts down and removes the floating traffic light widget.
+  Completely shuts down and closes the floating traffic light widget.
   ```powershell
-  traffic-status off
+  & "$env:LOCALAPPDATA\traffic-status\bin\traffic-status.exe" off
   ```

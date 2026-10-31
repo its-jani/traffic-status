@@ -52,11 +52,12 @@ fn main() -> eframe::Result<()> {
         .expect("Failed to spawn IPC thread");
 
     // Eframe window options: Authentic vertical floating widget at top-right corner
-    let initial_pos = get_top_right_pos(86.0);
+    // Outer dimensions: 104x280px to accommodate 72px aperture lamps and 3D hoods
+    let initial_pos = get_top_right_pos(104.0);
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([86.0, 228.0])
-            .with_min_inner_size([70.0, 160.0])
+            .with_inner_size([104.0, 280.0])
+            .with_min_inner_size([90.0, 200.0])
             .with_position(initial_pos)
             .with_transparent(true)
             .with_decorations(false)
@@ -87,17 +88,25 @@ fn get_top_right_pos(window_width: f32) -> [f32; 2] {
 }
 
 #[cfg(not(target_os = "windows"))]
-fn get_top_right_pos(window_width: f32) -> [f32; 2] {
+fn get_top_right_pos(_window_width: f32) -> [f32; 2] {
     [1200.0, 28.0]
 }
 
-/// Log every panic with a stable prefix, then defer to the default hook so the
-/// location/backtrace is still printed. Keeps a crash visible in logs instead
-/// of vanishing when the daemon runs detached.
 fn install_panic_hook() {
     let default_hook = std::panic::take_hook();
-    std::panic::set_hook(Box::new(move |info| {
-        eprintln!("[Traffic Status] panic: {info}");
-        default_hook(info);
+    std::panic::set_hook(Box::new(move |panic_info| {
+        let payload = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+            *s
+        } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {
+            s.as_str()
+        } else {
+            "Unknown panic"
+        };
+        let location = panic_info
+            .location()
+            .map(|l| format!("{}:{}:{}", l.file(), l.line(), l.column()))
+            .unwrap_or_else(|| "unknown location".to_string());
+        eprintln!("🔥 [Traffic Status Panic] {payload} at {location}");
+        default_hook(panic_info);
     }));
 }
