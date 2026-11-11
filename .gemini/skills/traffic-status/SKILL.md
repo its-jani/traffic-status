@@ -12,7 +12,7 @@ The user should NEVER be prompted to run color commands manually.
 - All state transitions MUST occur silently in the background via direct asynchronous loopback HTTP POST to `http://127.0.0.1:8765/state`:
   - 🟢 **Ready / Finished**: `{"session_id":"cli-session","state":"green","message":"Ready"}`
   - 🟡 **Thinking / Tool Invocation**: `{"session_id":"cli-session","state":"yellow","message":"Working..."}`
-  - 🔴 **Approval / User Prompt / Error**: `{"session_id":"cli-session","state":"red","message":"Waiting for approval"}`
+  - 🔴 **Asking Question / Approval / User Prompt / Error**: `{"session_id":"cli-session","state":"red","message":"Waiting for user input / answer"}` (When calling `ask_question`, requesting permission, or waiting for any user choice or answer, transition to RED immediately)
 - When using command-line tools, invoke the native binary directly without subshells or piping:
   - `& "$env:LOCALAPPDATA\traffic-status\bin\traffic-status.exe" on [LABEL]`
   - `& "$env:LOCALAPPDATA\traffic-status\bin\traffic-status.exe" off`

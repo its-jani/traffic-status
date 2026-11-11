@@ -88,6 +88,7 @@ async function sendTrafficPayload(endpoint, body, autoStart = false) {
 
 let isSessionActive = true;
 let activeSessionId = "opencode-agent";
+let isAwaitingInput = false;
 
 export const TrafficStatusPlugin = async (_ctx) => {
   return {
@@ -101,6 +102,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
         async execute(args) {
           if (args.action === "on") {
             isSessionActive = true;
+            isAwaitingInput = false;
             const ok = await sendTrafficPayload(
               "/session/on",
               {
@@ -116,6 +118,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
           }
           if (args.action === "off") {
             isSessionActive = false;
+            isAwaitingInput = false;
             await sendTrafficPayload("/session/off", {
               session_id: activeSessionId,
             });
@@ -136,24 +139,51 @@ export const TrafficStatusPlugin = async (_ctx) => {
     event: async ({ event }) => {
       if (!isSessionActive || !event) return;
 
-      const evType = event.type;
+      const evType = event.type || "";
       const props = event.properties || {};
 
       if (props.sessionID) {
         activeSessionId = `opencode-${props.sessionID.slice(0, 8)}`;
       }
 
-      // 1. Red transitions: Permission prompts, pauses, errors
-      if (evType === "permission.updated" || evType === "permission.ask") {
+      // 1. Red transitions: Permission prompts, questions, input requests, errors
+      const isQuestionOrPromptEvent =
+        evType.includes("question") ||
+        evType.includes("prompt") ||
+        evType.includes("ask") ||
+        evType.startsWith("permission");
+
+      const isResolvedOrRepliedEvent =
+        evType.includes("replied") ||
+        evType.includes("reply") ||
+        evType.includes("answer") ||
+        evType.includes("grant") ||
+        evType.includes("allow") ||
+        evType.includes("dismiss") ||
+        evType.includes("resolve");
+
+      if (isQuestionOrPromptEvent) {
+        if (isResolvedOrRepliedEvent) {
+          isAwaitingInput = false;
+          await sendTrafficPayload("/state", {
+            session_id: activeSessionId,
+            state: "yellow",
+            message: "Response received, resuming... 🟡",
+          });
+          return;
+        }
+
+        isAwaitingInput = true;
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
           state: "red",
-          message: "Waiting for user permission / input 🔴",
+          message: "Waiting for user answer / input 🔴",
         });
         return;
       }
 
       if (evType === "session.error") {
+        isAwaitingInput = false;
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
           state: "red",
@@ -162,17 +192,16 @@ export const TrafficStatusPlugin = async (_ctx) => {
         return;
       }
 
-      // 2. Green transitions: User replied, session idle / completed
-      if (evType === "permission.replied") {
-        await sendTrafficPayload("/state", {
-          session_id: activeSessionId,
-          state: "yellow",
-          message: "Permission received, resuming... 🟡",
-        });
-        return;
-      }
-
+      // 2. Idle transitions
       if (evType === "session.idle") {
+        if (isAwaitingInput) {
+          await sendTrafficPayload("/state", {
+            session_id: activeSessionId,
+            state: "red",
+            message: "Waiting for user answer / input 🔴",
+          });
+          return;
+        }
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
           state: "green",
@@ -181,27 +210,37 @@ export const TrafficStatusPlugin = async (_ctx) => {
         return;
       }
 
-      // 3. Status changes (busy -> yellow, idle -> green)
+      // 3. Status changes (busy -> yellow, idle -> green or red if awaiting input)
       if (evType === "session.status" && props.status) {
         const statusType = props.status.type;
         if (statusType === "busy") {
+          isAwaitingInput = false;
           await sendTrafficPayload("/state", {
             session_id: activeSessionId,
             state: "yellow",
             message: "Working / Thinking... 🟡",
           });
         } else if (statusType === "idle") {
-          await sendTrafficPayload("/state", {
-            session_id: activeSessionId,
-            state: "green",
-            message: "Ready 🟢",
-          });
+          if (isAwaitingInput) {
+            await sendTrafficPayload("/state", {
+              session_id: activeSessionId,
+              state: "red",
+              message: "Waiting for user answer / input 🔴",
+            });
+          } else {
+            await sendTrafficPayload("/state", {
+              session_id: activeSessionId,
+              state: "green",
+              message: "Ready 🟢",
+            });
+          }
         }
       }
     },
 
     "chat.message": async (input) => {
       if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
+      isAwaitingInput = false;
       if (isSessionActive) {
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
@@ -213,6 +252,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
 
     "command.execute.before": async (input) => {
       if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
+      isAwaitingInput = false;
       if (isSessionActive) {
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
@@ -225,15 +265,36 @@ export const TrafficStatusPlugin = async (_ctx) => {
     "tool.execute.before": async (input) => {
       if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
       if (isSessionActive) {
-        await sendTrafficPayload("/state", {
-          session_id: activeSessionId,
-          state: "yellow",
-          message: `Running ${input.tool}... 🟡`,
-        });
+        const toolName = (input.tool || "").toLowerCase();
+        const isQuestionOrPromptTool =
+          toolName.includes("question") ||
+          toolName.includes("ask") ||
+          toolName.includes("prompt") ||
+          toolName.includes("confirm") ||
+          toolName.includes("input") ||
+          toolName.includes("choice") ||
+          toolName.includes("select");
+
+        if (isQuestionOrPromptTool) {
+          isAwaitingInput = true;
+          await sendTrafficPayload("/state", {
+            session_id: activeSessionId,
+            state: "red",
+            message: `Waiting for user answer (${input.tool})... 🔴`,
+          });
+        } else {
+          isAwaitingInput = false;
+          await sendTrafficPayload("/state", {
+            session_id: activeSessionId,
+            state: "yellow",
+            message: `Running ${input.tool}... 🟡`,
+          });
+        }
       }
     },
 
     "permission.ask": async () => {
+      isAwaitingInput = true;
       if (isSessionActive) {
         await sendTrafficPayload("/state", {
           session_id: activeSessionId,
@@ -243,7 +304,53 @@ export const TrafficStatusPlugin = async (_ctx) => {
       }
     },
 
+    "permission.replied": async () => {
+      isAwaitingInput = false;
+      if (isSessionActive) {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "yellow",
+          message: "Permission received, resuming... 🟡",
+        });
+      }
+    },
+
+    "question.ask": async () => {
+      isAwaitingInput = true;
+      if (isSessionActive) {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "red",
+          message: "Waiting for user answer / input 🔴",
+        });
+      }
+    },
+
+    "question.replied": async () => {
+      isAwaitingInput = false;
+      if (isSessionActive) {
+        await sendTrafficPayload("/state", {
+          session_id: activeSessionId,
+          state: "yellow",
+          message: "Response received, processing... 🟡",
+        });
+      }
+    },
+
     "tool.execute.after": async (input, output) => {
+      const toolName = (input.tool || "").toLowerCase();
+      if (
+        toolName.includes("question") ||
+        toolName.includes("ask") ||
+        toolName.includes("prompt") ||
+        toolName.includes("confirm") ||
+        toolName.includes("input") ||
+        toolName.includes("choice") ||
+        toolName.includes("select")
+      ) {
+        isAwaitingInput = false;
+      }
+
       if (isSessionActive) {
         const isError = output && output.output && (
           output.output.includes("error:") ||
