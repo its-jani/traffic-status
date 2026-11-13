@@ -82,9 +82,9 @@ impl eframe::App for TrafficStatusApp {
         self.last_frame_time = now;
 
         self.store.ensure_active();
-        let active_session = self.store.active_session().cloned();
-        let current_state = active_session
-            .as_ref()
+        let current_state = self
+            .store
+            .active_session()
             .map(|s| s.state)
             .unwrap_or(LightState::Off);
 
@@ -208,26 +208,6 @@ impl eframe::App for TrafficStatusApp {
                         self.green_weight,
                         self.pulse_phase,
                     );
-
-                    // Hover tooltips for active session
-                    if let Some(session) = &active_session {
-                        let elapsed = session.last_updated.elapsed().as_secs();
-                        let time_str = if elapsed < 60 {
-                            format!("{elapsed}s ago")
-                        } else {
-                            format!("{}m ago", elapsed / 60)
-                        };
-                        let tooltip_text = format!(
-                            "{}\nSession: {}\nUpdated: {}\nMessage: {}",
-                            session.state.display_name(),
-                            session.label,
-                            time_str,
-                            session.message.as_deref().unwrap_or("Ready")
-                        );
-                        drag_response.on_hover_text(tooltip_text);
-                    } else {
-                        drag_response.on_hover_text("Traffic Status (Standby)");
-                    }
 
                     // Discreet hover controls (Close '✕' and Minimize '—')
                     if is_hovered {
@@ -415,7 +395,7 @@ fn draw_screw(painter: &egui::Painter, pos: Pos2) {
 
 /// Draws a lamp matching the reference video design:
 /// - Recessed seating socket (#2E353E to #0B0E12)
-/// - Multi-stage soft radial bloom
+/// - Crisp optical lens with all lighting strictly contained inside the lamp aperture
 /// - Glass lens with unlit baseline reflection (16% color) blending to 100% lit
 /// - 3D visor cowl with downward shadow
 /// - Dotted LED emitter grid
@@ -432,35 +412,50 @@ fn draw_reference_lamp(
 ) {
     let effective_weight = weight * pulse;
 
-    // 1. Recessed Conical Socket (.lamp__u::before in reference CSS)
+    // 1. Recessed Bezel Ring Socket (Dark mounting frame)
     let socket_radius = radius + 2.0;
-    painter.circle_filled(center, socket_radius, Color32::from_rgb(11, 14, 18));
+    painter.circle_filled(center, socket_radius, Color32::from_rgb(12, 15, 19));
     painter.circle_stroke(
         center,
         socket_radius,
-        Stroke::new(1.0_f32, Color32::from_rgba_unmultiplied(0, 0, 0, 210)),
+        Stroke::new(1.0_f32, Color32::from_rgba_unmultiplied(0, 0, 0, 230)),
+    );
+    // Outer subtle bezel highlight on upper rim
+    painter.circle_stroke(
+        center,
+        socket_radius - 0.5,
+        Stroke::new(0.6_f32, Color32::from_rgba_unmultiplied(255, 255, 255, 18)),
     );
 
-    // 2. Multi-Stage Soft Radial Bloom Glow (Surrounding active lamps)
-    if effective_weight > 0.02 {
-        let alpha_outer = (45.0 * effective_weight) as u8;
-        let alpha_mid = (90.0 * effective_weight) as u8;
+    // 2. Base Glass Lens Color (Smoothly blended from unlit 16% baseline to 100% lit)
+    let t = effective_weight.clamp(0.0, 1.0);
+    let r = ((1.0 - t) * unlit_color.r() as f32 + t * lit_color.r() as f32) as u8;
+    let g = ((1.0 - t) * unlit_color.g() as f32 + t * lit_color.g() as f32) as u8;
+    let b = ((1.0 - t) * unlit_color.b() as f32 + t * lit_color.b() as f32) as u8;
+    let lens_color = Color32::from_rgb(r, g, b);
 
-        // Outer ambient glow (radius * 1.8)
+    // Lens glass body - STRICTLY CONFINED TO RADIUS
+    painter.circle_filled(center, radius, lens_color);
+
+    // 3. Internal Lens Illumination Core (Strictly confined inside the lens - NEVER outside radius)
+    if effective_weight > 0.02 {
+        // Inner luminous glow core (radius * 0.82)
+        let alpha_core = (105.0 * effective_weight) as u8;
         painter.circle_filled(
             center,
-            radius * 1.8,
+            radius * 0.82,
             Color32::from_rgba_unmultiplied(
                 glow_color.r(),
                 glow_color.g(),
                 glow_color.b(),
-                alpha_outer,
+                alpha_core,
             ),
         );
-        // Saturated core bloom (radius * 1.35)
+        // Saturated center bloom (radius * 0.52)
+        let alpha_mid = (150.0 * effective_weight) as u8;
         painter.circle_filled(
             center,
-            radius * 1.35,
+            radius * 0.52,
             Color32::from_rgba_unmultiplied(
                 glow_color.r(),
                 glow_color.g(),
@@ -468,43 +463,48 @@ fn draw_reference_lamp(
                 alpha_mid,
             ),
         );
+        // Center hot-spot (radius * 0.28)
+        let alpha_hot = (180.0 * effective_weight) as u8;
+        painter.circle_filled(
+            center,
+            radius * 0.28,
+            Color32::from_rgba_unmultiplied(255, 255, 255, alpha_hot),
+        );
     }
 
-    // 3. Base Glass Lens Color (Smoothly blended from unlit 16% baseline to 100% lit)
-    let t = effective_weight.clamp(0.0, 1.0);
-    let r = ((1.0 - t) * unlit_color.r() as f32 + t * lit_color.r() as f32) as u8;
-    let g = ((1.0 - t) * unlit_color.g() as f32 + t * lit_color.g() as f32) as u8;
-    let b = ((1.0 - t) * unlit_color.b() as f32 + t * lit_color.b() as f32) as u8;
-    let lens_color = Color32::from_rgb(r, g, b);
-
-    painter.circle_filled(center, radius, lens_color);
-
-    // Lens rim highlights (inner bottom shadow, inner top rim highlight)
-    painter.circle_stroke(
-        center,
-        radius,
-        Stroke::new(
-            1.0_f32,
-            Color32::from_rgba_unmultiplied(255, 255, 255, (20.0 + 40.0 * effective_weight) as u8),
-        ),
-    );
-
-    // 4. Fine-grained Dotted LED Matrix Grid Texture (as in reference styles.css)
+    // 4. Fine-grained Dotted LED Matrix Grid Texture (inside radius - 2.8)
     draw_grid_led_matrix(painter, center, radius, effective_weight);
 
     // 5. Downward Visor Cast Shadow on upper half of lens
     let shadow_rect = Rect::from_min_max(
-        Pos2::new(center.x - radius, center.y - radius),
-        Pos2::new(center.x + radius, center.y + 4.0),
+        Pos2::new(center.x - radius + 1.5, center.y - radius),
+        Pos2::new(center.x + radius - 1.5, center.y + 3.0),
     );
     painter.rect_filled(
         shadow_rect,
-        Rounding::ZERO,
+        Rounding::same(radius * 0.35),
         Color32::from_rgba_unmultiplied(0, 0, 0, 85),
     );
 
-    // 6. 3D Cylindrical Visor Cowl (Sun Shade Dome)
-    draw_3d_visor_cowl(painter, center, radius, effective_weight, glow_color);
+    // 6. Crisp Lens Glass Outer Rim Stroke (Defines the exact circular boundary)
+    let rim_highlight_alpha = (30.0 + 45.0 * effective_weight) as u8;
+    painter.circle_stroke(
+        center,
+        radius,
+        Stroke::new(
+            1.2_f32,
+            Color32::from_rgba_unmultiplied(255, 255, 255, rim_highlight_alpha),
+        ),
+    );
+    // Dark inner rim ring right inside the edge
+    painter.circle_stroke(
+        center,
+        radius - 0.8,
+        Stroke::new(0.8_f32, Color32::from_rgba_unmultiplied(0, 0, 0, 160)),
+    );
+
+    // 7. 3D Cylindrical Visor Cowl (Sun Shade Dome)
+    draw_3d_visor_cowl(painter, center, radius);
 }
 
 /// Draws the realistic 3D visor cowl matching reference video:
@@ -513,8 +513,6 @@ fn draw_3d_visor_cowl(
     painter: &egui::Painter,
     center: Pos2,
     radius: f32,
-    weight: f32,
-    glow_color: Color32,
 ) {
     let visor_r = radius + 3.0;
 
@@ -554,26 +552,6 @@ fn draw_3d_visor_cowl(
         -0.14,
         Stroke::new(2.4_f32, Color32::from_rgba_unmultiplied(8, 10, 14, 240)),
     );
-
-    // Active visor inner crescent reflection when lit
-    if weight > 0.05 {
-        draw_arc(
-            painter,
-            center,
-            radius + 1.6,
-            -2.75,
-            -0.39,
-            Stroke::new(
-                1.6_f32,
-                Color32::from_rgba_unmultiplied(
-                    glow_color.r(),
-                    glow_color.g(),
-                    glow_color.b(),
-                    (190.0 * weight) as u8,
-                ),
-            ),
-        );
-    }
 }
 
 /// Draws fine-grained dotted LED matrix grid (matching reference CSS background-size: 11% 11%)
