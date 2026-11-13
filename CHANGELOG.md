@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-11-13
+
+### Fixed
+- **Contained Lamp Illumination**: Confined all optical lighting and glows strictly within the 36px lens radius, eliminating light bleeding beyond the circular bezel, housing, or adjacent lamps.
+- **Removed Overlapping Tooltip**: Removed the full-window hover tooltip box that was covering the top of the traffic light when scrolling or moving the cursor across the screen.
+- **Automated Red State on Questions & Prompts**: Added `isAwaitingInput` lifecycle tracking in the OpenCode plugin and agent skills to immediately transition to 🔴 Red on questions (`ask_question`), interactive option selects, and permission requests, maintaining red state until the user replies.
+- **Code Formatting**: Fixed `cargo fmt` multiline function signature in `draw_3d_visor_cowl` to satisfy CI checks.
+
 ## [0.3.0] - 2026-10-31
 
 ### Added

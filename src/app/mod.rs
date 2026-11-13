@@ -509,11 +509,7 @@ fn draw_reference_lamp(
 
 /// Draws the realistic 3D visor cowl matching reference video:
 /// 3D layered cylindrical shroud framing the top aperture, casting inner shadows and catching rim light.
-fn draw_3d_visor_cowl(
-    painter: &egui::Painter,
-    center: Pos2,
-    radius: f32,
-) {
+fn draw_3d_visor_cowl(painter: &egui::Painter, center: Pos2, radius: f32) {
     let visor_r = radius + 3.0;
 
     // Outer Visor Body: Layered arcs creating 3D cylindrical projection
