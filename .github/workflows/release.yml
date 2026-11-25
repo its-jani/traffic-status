@@ -4,6 +4,14 @@ on:
   push:
     tags:
       - "v*"
+  # Re-run a release for an existing tag without rewriting it (used after a
+  # transient CI failure, e.g. when the tag push already succeeded).
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish (e.g. v0.4.0)"
+        required: true
+        type: string
 
 permissions: {}
 
@@ -86,11 +94,23 @@ jobs:
           Copy-Item ../install.ps1 .
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
-        with:
-          files: |
-            release-assets/*
-          generate_release_notes: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ inputs.tag || github.ref_name }}
+        run: |
+          # The official CLI is used instead of softprops/action-gh-release:
+          # the pinned action build aborts with "Cannot read properties of
+          # undefined (reading 'data')" while creating the release.
+          VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          if [ "${TAG_NAME#v}" != "$VERSION" ]; then
+            echo "tag $TAG_NAME does not match Cargo.toml version $VERSION" >&2
+            exit 1
+          fi
+          gh release create "$TAG_NAME" release-assets/* \
+            --title "$TAG_NAME" \
+            --generate-notes \
+            --verify-tag
 
   publish-npm:
     name: npm Trusted Publishing
