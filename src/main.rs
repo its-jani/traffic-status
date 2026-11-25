@@ -1,5 +1,6 @@
 pub mod app;
 pub mod cli;
+pub mod config;
 pub mod installer;
 pub mod ipc;
 pub mod types;
@@ -9,6 +10,7 @@ use eframe::egui;
 
 use crate::app::TrafficStatusApp;
 use crate::cli::handle_cli_args;
+use crate::config::{clamp_position, AppConfig, ScreenBounds};
 use crate::ipc::start_ipc_server;
 use crate::types::IpcCommand;
 
@@ -52,17 +54,34 @@ fn main() -> eframe::Result<()> {
         .expect("Failed to spawn IPC thread");
 
     // Eframe window options: Authentic vertical floating widget at top-right corner
-    // Outer dimensions: 104x280px to accommodate 72px aperture lamps and 3D hoods
-    let initial_pos = get_top_right_pos(104.0);
+    // Outer dimensions: 104x280px (at scale 1.0) to accommodate 72px aperture lamps and 3D hoods
+    let config = AppConfig::load();
+    let scale = config.scale;
+    let window_size = [104.0 * scale, 280.0 * scale];
+    let initial_pos = match config.window.as_pos() {
+        // Restore the dragged position, but never spawn off-screen after a
+        // secondary monitor was disconnected.
+        Some(pos) => {
+            let (x, y) = clamp_position(
+                pos,
+                (window_size[0], window_size[1]),
+                ScreenBounds::virtual_desktop(),
+            );
+            [x, y]
+        }
+        None => default_top_right(window_size[0]),
+    };
+
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([104.0, 280.0])
-            .with_min_inner_size([90.0, 200.0])
+            .with_inner_size(window_size)
+            .with_min_inner_size([90.0 * scale, 200.0 * scale])
             .with_position(initial_pos)
             .with_transparent(true)
             .with_decorations(false)
             .with_always_on_top()
             .with_taskbar(false)
+            .with_mouse_passthrough(config.ghost)
             .with_title("Traffic Status"),
         ..Default::default()
     };
@@ -70,26 +89,16 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Traffic Status",
         native_options,
-        Box::new(|cc| Ok(Box::new(TrafficStatusApp::new(cc, rx)))),
+        Box::new(move |cc| Ok(Box::new(TrafficStatusApp::new(cc, rx, config)))),
     )
 }
 
-#[cfg(target_os = "windows")]
-fn get_top_right_pos(window_width: f32) -> [f32; 2] {
-    #[link(name = "user32")]
-    extern "system" {
-        fn GetSystemMetrics(n_index: i32) -> i32;
-    }
-    // SM_CXSCREEN = 0
-    let screen_w = unsafe { GetSystemMetrics(0) };
+/// Default spawn point: top-right corner of the virtual desktop.
+fn default_top_right(window_width: f32) -> [f32; 2] {
+    let bounds = ScreenBounds::virtual_desktop();
     let margin = 28.0;
-    let x = (screen_w as f32 - window_width - margin).max(0.0);
-    [x, margin]
-}
-
-#[cfg(not(target_os = "windows"))]
-fn get_top_right_pos(_window_width: f32) -> [f32; 2] {
-    [1200.0, 28.0]
+    let x = (bounds.x + bounds.width - window_width - margin).max(bounds.x);
+    [x, bounds.y + margin]
 }
 
 fn install_panic_hook() {

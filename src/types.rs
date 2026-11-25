@@ -33,20 +33,39 @@ impl LightState {
             Self::Off => "Standby",
         }
     }
+
+    /// Severity used to multiplex concurrent sessions: `Red > Yellow > Green`.
+    /// `Off` only describes an empty registry and ranks below everything.
+    pub fn severity(self) -> u8 {
+        match self {
+            Self::Off => 0,
+            Self::Green => 1,
+            Self::Yellow => 2,
+            Self::Red => 3,
+        }
+    }
 }
 
+/// One concurrently tracked agent session in the daemon registry.
 #[derive(Debug, Clone)]
-pub struct SessionInfo {
+pub struct SessionEntry {
     pub id: String,
     pub label: String,
+    /// Agent that owns the session (e.g. `"OpenCode"`), when reported.
+    pub source: Option<String>,
     pub state: LightState,
     pub message: Option<String>,
     pub last_updated: Instant,
 }
 
-impl SessionInfo {
-    pub fn new(id: String, label: Option<String>, initial_state: Option<LightState>) -> Self {
-        let display_label = label.unwrap_or_else(|| {
+impl SessionEntry {
+    pub fn new(
+        id: String,
+        label: Option<String>,
+        source: Option<String>,
+        initial_state: Option<LightState>,
+    ) -> Self {
+        let display_label = label.or_else(|| source.clone()).unwrap_or_else(|| {
             if id.starts_with("session-") || id.chars().count() <= 12 {
                 id.clone()
             } else {
@@ -57,6 +76,7 @@ impl SessionInfo {
         Self {
             id,
             label: display_label,
+            source,
             state: initial_state.unwrap_or(LightState::Green),
             message: None,
             last_updated: Instant::now(),
@@ -74,10 +94,19 @@ pub struct IpcPayload {
     pub state: Option<String>,
     #[serde(default)]
     pub label: Option<String>,
+    /// Agent name owning the session, e.g. `"Qoder"` or `"OpenCode"`.
+    #[serde(default)]
+    pub source: Option<String>,
     #[serde(default)]
     pub message: Option<String>,
     #[serde(default)]
-    pub action: Option<String>, // "on", "off", "set", "clear", "ping"
+    pub action: Option<String>, // "on", "off", "set", "clear", "config", "ping"
+    /// Desired widget scale multiplier (`/config`).
+    #[serde(default)]
+    pub scale: Option<f32>,
+    /// Desired click-through mode (`/config`).
+    #[serde(default)]
+    pub ghost: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
@@ -86,15 +115,22 @@ pub enum IpcCommand {
         session_id: String,
         state: LightState,
         label: Option<String>,
+        source: Option<String>,
         message: Option<String>,
     },
     SessionOn {
         session_id: String,
         label: Option<String>,
+        source: Option<String>,
         initial_state: Option<LightState>,
     },
     SessionOff {
         session_id: String,
+    },
+    /// Desktop ergonomics: widget scale and/or click-through mode.
+    UpdateConfig {
+        scale: Option<f32>,
+        ghost: Option<bool>,
     },
     ClearAll,
     Shutdown,

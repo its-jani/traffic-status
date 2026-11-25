@@ -1,6 +1,6 @@
 [package]
 name = "traffic-status"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2021"
 authors = ["Traffic Status Team"]
 description = "Lightweight, non-Electron floating desktop traffic light for AI coding agents"
@@ -20,7 +20,6 @@ tokio = { version = "1.41", features = ["rt-multi-thread", "net", "io-util", "sy
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 crossbeam-channel = "0.5"
-chrono = { version = "0.4", default-features = false, features = ["clock"] }
 dirs = "5.0"
 
 [dev-dependencies]

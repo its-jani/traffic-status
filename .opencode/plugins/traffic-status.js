@@ -59,6 +59,9 @@ async function ensureDaemonRunning() {
 }
 
 async function sendTrafficPayload(endpoint, body, autoStart = false) {
+  // Tag every payload with a stable agent name; the daemon stores it per session
+  // and multiplexes concurrent agents with Red > Yellow > Green precedence.
+  const payload = { source: "OpenCode", ...body };
   try {
     if (autoStart) {
       await ensureDaemonRunning();
@@ -66,7 +69,7 @@ async function sendTrafficPayload(endpoint, body, autoStart = false) {
     const res = await fetch(`${BASE_URL}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
     return res.ok;
   } catch (e) {
@@ -75,7 +78,7 @@ async function sendTrafficPayload(endpoint, body, autoStart = false) {
         const retryRes = await fetch(`${BASE_URL}${endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
+          body: JSON.stringify(payload),
         });
         return retryRes.ok;
       } catch {
@@ -87,17 +90,31 @@ async function sendTrafficPayload(endpoint, body, autoStart = false) {
 }
 
 let isSessionActive = true;
-let activeSessionId = "opencode-agent";
+// Unique per OpenCode process, so two agents in separate terminals never
+// overwrite each other's light.
+const SESSION_PREFIX = `opencode-${process.pid}`;
+let activeSessionId = SESSION_PREFIX;
 let isAwaitingInput = false;
+
+function bindSession(sessionID) {
+  activeSessionId = sessionID ? `${SESSION_PREFIX}-${sessionID.slice(0, 8)}` : SESSION_PREFIX;
+  return activeSessionId;
+}
 
 export const TrafficStatusPlugin = async (_ctx) => {
   return {
     tool: {
       traffic: tool({
-        description: "Control floating desktop traffic status indicator (on, off, green, yellow, red)",
+        description:
+          "Control floating desktop traffic status indicator (on, off, green, yellow, red, ghost, scale)",
         args: {
-          action: tool.schema.enum(["on", "off", "green", "yellow", "red"]).describe("Action to perform"),
-          message: tool.schema.string().optional().describe("Status message to display"),
+          action: tool.schema
+            .enum(["on", "off", "green", "yellow", "red", "ghost", "scale"])
+            .describe("Action to perform"),
+          message: tool.schema
+            .string()
+            .optional()
+            .describe("Status message, 'on'/'off' for ghost mode, or a 0.5-2.0 factor for scale"),
         },
         async execute(args) {
           if (args.action === "on") {
@@ -124,6 +141,20 @@ export const TrafficStatusPlugin = async (_ctx) => {
             });
             return "Traffic Status dismissed ⚪";
           }
+          if (args.action === "ghost") {
+            const enable = (args.message || "on").toLowerCase() !== "off";
+            const ok = await sendTrafficPayload("/config", { ghost: enable }, true);
+            if (!ok) return "Failed to reach Traffic Status daemon.";
+            return enable
+              ? "Ghost mode enabled — clicks pass through, hold Alt to drag 👻"
+              : "Ghost mode disabled 🖱️";
+          }
+          if (args.action === "scale") {
+            const scale = Number.parseFloat(args.message || "1");
+            if (!Number.isFinite(scale)) return "Usage: traffic scale <0.5-2.0>";
+            const ok = await sendTrafficPayload("/config", { scale }, true);
+            return ok ? `Widget scale set to ${scale}x 🔍` : "Failed to reach Traffic Status daemon.";
+          }
           if (isSessionActive) {
             await sendTrafficPayload("/state", {
               session_id: activeSessionId,
@@ -143,7 +174,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
       const props = event.properties || {};
 
       if (props.sessionID) {
-        activeSessionId = `opencode-${props.sessionID.slice(0, 8)}`;
+        bindSession(props.sessionID);
       }
 
       // 1. Red transitions: Permission prompts, questions, input requests, errors
@@ -239,7 +270,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
     },
 
     "chat.message": async (input) => {
-      if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
+      bindSession(input.sessionID);
       isAwaitingInput = false;
       if (isSessionActive) {
         await sendTrafficPayload("/state", {
@@ -251,7 +282,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
     },
 
     "command.execute.before": async (input) => {
-      if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
+      bindSession(input.sessionID);
       isAwaitingInput = false;
       if (isSessionActive) {
         await sendTrafficPayload("/state", {
@@ -263,7 +294,7 @@ export const TrafficStatusPlugin = async (_ctx) => {
     },
 
     "tool.execute.before": async (input) => {
-      if (input.sessionID) activeSessionId = `opencode-${input.sessionID.slice(0, 8)}`;
+      bindSession(input.sessionID);
       if (isSessionActive) {
         const toolName = (input.tool || "").toLowerCase();
         const isQuestionOrPromptTool =

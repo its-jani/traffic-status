@@ -140,6 +140,7 @@ pub fn decide(head: &RequestHead<'_>, raw: &str) -> HttpOutcome {
         || path == "/on"
         || path == "/session/off"
         || path == "/off"
+        || path == "/config"
         || path == "/clear"
         || path == "/shutdown";
 
@@ -176,8 +177,11 @@ pub fn decide(head: &RequestHead<'_>, raw: &str) -> HttpOutcome {
             id: None,
             state: None,
             label: None,
+            source: None,
             message: None,
             action: None,
+            scale: None,
+            ghost: None,
         }
     } else {
         match serde_json::from_str::<IpcPayload>(trimmed_body) {
@@ -209,6 +213,14 @@ fn dispatch(path: &str, payload: IpcPayload) -> HttpOutcome {
             status: "200 OK",
             body: r#"{"status":"ok","action":"shutdown"}"#.to_string(),
         }
+    } else if path == "/config" || action == "config" {
+        let scale = payload.scale.filter(|s| s.is_finite());
+        let ghost = payload.ghost;
+        HttpOutcome::Dispatch {
+            command: IpcCommand::UpdateConfig { scale, ghost },
+            status: "200 OK",
+            body: r#"{"status":"ok","action":"config"}"#.to_string(),
+        }
     } else if path == "/session/on" || path == "/on" || action == "on" {
         let initial_state = payload.state.as_deref().and_then(LightState::parse_str);
         let body = format!(
@@ -219,6 +231,7 @@ fn dispatch(path: &str, payload: IpcPayload) -> HttpOutcome {
             command: IpcCommand::SessionOn {
                 session_id,
                 label: payload.label,
+                source: payload.source,
                 initial_state,
             },
             status: "200 OK",
@@ -257,6 +270,7 @@ fn dispatch(path: &str, payload: IpcPayload) -> HttpOutcome {
                 session_id,
                 state,
                 label: payload.label,
+                source: payload.source,
                 message: payload.message,
             },
             status: "200 OK",
@@ -282,10 +296,16 @@ pub fn decide_raw(text: &str) -> Option<IpcCommand> {
             Some(IpcCommand::SessionOn {
                 session_id,
                 label: payload.label,
+                source: payload.source,
                 initial_state,
             })
         } else if action == "clear" {
             Some(IpcCommand::ClearAll)
+        } else if action == "config" {
+            Some(IpcCommand::UpdateConfig {
+                scale: payload.scale.filter(|s| s.is_finite()),
+                ghost: payload.ghost,
+            })
         } else {
             let state = payload
                 .state
@@ -296,6 +316,7 @@ pub fn decide_raw(text: &str) -> Option<IpcCommand> {
                 session_id,
                 state,
                 label: payload.label,
+                source: payload.source,
                 message: payload.message,
             })
         }
@@ -317,6 +338,7 @@ pub fn decide_raw(text: &str) -> Option<IpcCommand> {
                 session_id,
                 state,
                 label: None,
+                source: None,
                 message: None,
             })
         }
@@ -460,6 +482,64 @@ mod tests {
             })
         ));
         assert!(decide_raw("nonsense").is_none());
+    }
+
+    #[test]
+    fn state_defaults_to_default_session_and_carries_source() {
+        let raw = "POST /state HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\n\r\n{\"state\":\"yellow\",\"source\":\"Qoder\"}";
+        match decide(&head(raw), raw) {
+            HttpOutcome::Dispatch { command, .. } => match command {
+                IpcCommand::SetState {
+                    session_id,
+                    state,
+                    source,
+                    ..
+                } => {
+                    assert_eq!(session_id, "default");
+                    assert_eq!(state, LightState::Yellow);
+                    assert_eq!(source.as_deref(), Some("Qoder"));
+                }
+                _ => panic!("expected a state update"),
+            },
+            _ => panic!("expected dispatch"),
+        }
+    }
+
+    #[test]
+    fn config_endpoint_forwards_scale_and_ghost() {
+        let raw = "POST /config HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\n\r\n{\"scale\":0.75,\"ghost\":true}";
+        match decide(&head(raw), raw) {
+            HttpOutcome::Dispatch { command, .. } => match command {
+                IpcCommand::UpdateConfig { scale, ghost } => {
+                    assert_eq!(scale, Some(0.75));
+                    assert_eq!(ghost, Some(true));
+                }
+                _ => panic!("expected a config update"),
+            },
+            _ => panic!("expected dispatch"),
+        }
+
+        // Non-finite scales are dropped instead of poisoning the widget.
+        let raw = "POST /config HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\n\r\n{\"scale\":null,\"ghost\":false}";
+        match decide(&head(raw), raw) {
+            HttpOutcome::Dispatch {
+                command: IpcCommand::UpdateConfig { scale, ghost },
+                ..
+            } => {
+                assert_eq!(scale, None);
+                assert_eq!(ghost, Some(false));
+            }
+            _ => panic!("expected dispatch"),
+        }
+    }
+
+    #[test]
+    fn config_requires_post() {
+        let raw = "GET /config HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        assert_eq!(
+            status_of(&decide(&head(raw), raw)),
+            "405 Method Not Allowed"
+        );
     }
 
     #[test]

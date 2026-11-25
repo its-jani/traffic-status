@@ -1031,6 +1031,22 @@ pub fn run_doctor() {
         }
     }
 
+    // 4b. Desktop ergonomics config (position, scale, ghost mode)
+    if let Some(path) = crate::config::AppConfig::path() {
+        let config = crate::config::AppConfig::load();
+        let position = config
+            .window
+            .as_pos()
+            .map(|(x, y)| format!("({x:.0}, {y:.0})"))
+            .unwrap_or_else(|| "auto (top-right)".to_string());
+        println!(
+            "• Desktop Config: {} | position {position} | scale {:.2}x | ghost {}",
+            path.display(),
+            config.scale,
+            if config.ghost { "on" } else { "off" }
+        );
+    }
+
     // 5. Hooks Check
     if let Some(home) = get_home_dir() {
         let global_claude = home.join(".claude").join("commands").join("traffic.md");

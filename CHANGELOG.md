@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-11-25
+
+### Added
+- **Multi-Session Multiplexing (`Red > Yellow > Green`)**: `/state` now accepts an optional `session_id` (defaulting to `"default"`, so existing hooks keep working). The daemon stores every active session as a `SessionEntry` (`state`, `source`, `last_updated`) and resolves the visible bulb with strict severity precedence — a single `Red` session keeps the widget red even when another agent reports `Green`.
+- **Stale Session Garbage Collection**: Sessions silent for 20 minutes are pruned automatically, and `off` removes the reporting session immediately, so a closed terminal can never leave the light stuck on Yellow or Red. The widget closes only when the last session leaves.
+- **Per-Agent Session Identifiers**: The OpenCode plugin sends `opencode-<pid>-<session>`, the CLI derives `cli-<workspace-hash>`, and `TRAFFIC_STATUS_SESSION` / `--session <ID>` override both. All slash commands and skill docs document the payload (`session_id`, `source`).
+- **Draggable Capsule with Saved Coordinates**: The capsule can be dragged anywhere; the position is persisted to `%LOCALAPPDATA%\traffic-status\config.json` on drag release and restored on startup with virtual-desktop bounds validation, so a disconnected monitor never strands the widget off-screen.
+- **Ghost (Click-Through) Mode**: `--ghost`, `/traffic ghost on|off`, and `traffic-status ghost toggle` make clicks pass straight through to the IDE underneath; holding `Alt` temporarily suspends passthrough so the capsule stays draggable.
+- **Compact Scale Multiplier**: `--scale`, `/traffic scale 0.75`, and `POST /config` scale the 72px lens apertures, 80px spacing, and visor proportions between 0.5x and 2.0x for smaller displays (`1.0` default).
+- **Red Breathing Pulse**: The red lens now breathes with a 1.6-second sinusoidal brightness sweep between 82% and 100% intensity, confined inside the lens ring; Green and Yellow remain steady after their 250ms exponential fade.
+- **`traffic-status shutdown` / `/traffic shutdown`**: Explicit daemon termination, separated from per-session `off`.
+- **`config` IPC endpoint**: `POST /config` with `{"scale":0.75,"ghost":true}` updates the live widget without restarting it.
+
+### Changed
+- `doctor` now reports the desktop config path, remembered position, scale, and ghost state.
+- Removed the unused `chrono` dependency.
+
+### Tests
+- Unit coverage for priority aggregation, TTL pruning, session removal, coordinate serialization/loading, scale clamping, and on-screen bounds validation.
+
 ## [0.3.2] - 2026-11-13
 
 ### Fixed
