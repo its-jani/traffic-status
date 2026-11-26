@@ -25,7 +25,7 @@
     <div data-sc-stage class="hero">
       <div class="hero__meta">
         <span class="mark">traffic-status</span>
-        <span class="mark hero__meta-r">v0.3.2 · Windows x64</span>
+        <span class="mark hero__meta-r">v0.4.0 · Windows x64</span>
       </div>
 
       <div class="hero__mid">
@@ -43,7 +43,7 @@
       </div>
 
       <div class="hero__foot">
-        <p class="hero__sub sc-body" data-sc-cue="0 0.9 0">A floating traffic light for AI coding agents. Native Rust, one command to install, no Electron, no taskbar entry, no telemetry. Green when it is ready, yellow while it works, red when it needs you.</p>
+        <p class="hero__sub sc-body" data-sc-cue="0 0.9 0">A floating traffic light for AI coding agents. Native Rust, one command to install, no Electron, no taskbar entry, no telemetry. Green when it is ready, yellow while it works, red when it needs you. Run several agents at once and the lamp holds the most urgent state: red over yellow over green.</p>
         <p class="hero__cta"><a class="link" href="#install">Install it</a></p>
       </div>
     </div>
@@ -97,7 +97,7 @@
           </div>
 
           <div class="states__measured">
-            <p class="sc-body states__para" data-audit-para data-sc-cue="0 0.99 0 0.08">Green means it finished and is waiting for you. Yellow means it is still going: generating, running a tool, holding a command open. Red means it stopped and wants a decision, a permission, or a fix. The light is the whole interface; the message is only in the tooltip.</p>
+            <p class="sc-body states__para" data-audit-para data-sc-cue="0 0.99 0 0.08">Green means it finished and is waiting for you. Yellow means it is still going: generating, running a tool, holding a command open. Red means it stopped and wants a decision, a permission, or a fix. When more than one session reports at the same time the lamp settles on the most severe state, red over yellow over green, and only drops back once the blocked session is released. The light is the whole interface; the message is only in the tooltip.</p>
 
             <span class="anno anno--measure">
               <span class="anno__bracket" aria-hidden="true"></span>
@@ -165,7 +165,7 @@
       <div class="rail" data-sc-pan="0.05">
         <div class="rail__lead">
           <h2 class="h2">Five agents.<br>One light.</h2>
-          <p class="sc-body">Each hook is a slash command written in that agent's own format. Install once and every session reports to the same widget.</p>
+          <p class="sc-body">Each hook is a slash command written in that agent's own format. Install once and every terminal registers its own session id, so concurrent agents never overwrite each other: the capsule grows a numbered session rail and the lamp shows whichever of them is most urgent.</p>
         </div>
 
         <article class="agent">
@@ -234,7 +234,7 @@
 
     <div class="sc-wrap approve" data-sc-in data-sc-stagger="60">
       <h3 class="approve__h">What it is</h3>
-      <p class="sc-body approve__names">A capsule window, 86 by 236 pixels for one session and 118 by 236 for several, parked 28 pixels from the top-right corner and draggable anywhere.</p>
+      <p class="sc-body approve__names">A capsule window, 104 by 280 pixels for one session and 136 by 280 once a second session joins, parked 28 pixels from the top-right corner and draggable anywhere. The position is written to <code class="inline">config.json</code> and restored on the next launch, clamped so a disconnected monitor can never strand it off-screen.</p>
       <p class="sc-body">A Rust binary: eframe and egui for the window, a tokio runtime for the loopback server, serde for the payloads. The widget draws itself with no taskbar entry and no console. Every state change is a POST with a JSON body, capped at 64 KB, rejected with 405 if it arrives as a GET.</p>
     </div>
   </section>
@@ -268,6 +268,14 @@
           <dd>A background process with no console and no taskbar entry; it starts on the first <code class="inline">/traffic on</code> and dies on <code class="inline">/traffic off</code></dd>
         </div>
         <div class="spec__row">
+          <dt>Sessions</dt>
+          <dd>One <code class="inline">/traffic on</code> per terminal, each with its own id. The lamp shows the most urgent state across all of them, red over yellow over green; a session silent for 20 minutes is dropped</dd>
+        </div>
+        <div class="spec__row">
+          <dt>Window</dt>
+          <dd>Dragged position persists to <code class="inline">%LOCALAPPDATA%\traffic-status\config.json</code>. <code class="inline">--ghost</code> lets clicks pass through, <code class="inline">--scale</code> resizes the capsule for smaller screens</dd>
+        </div>
+        <div class="spec__row">
           <dt>IPC</dt>
           <dd>HTTP on <code class="inline">127.0.0.1:8765</code>. POST with a JSON body for every change, 64 KB ceiling, GET refused</dd>
         </div>
@@ -294,10 +302,10 @@
       <div class="close__inner">
         <div class="close__text">
           <h2 class="close__h" data-sc-cue="0.04">Install once.<br>Ignore it after.</h2>
-          <p class="close__p" data-sc-cue="0.04">A Rust traffic light for Claude Code, Qoder, Codex, OpenCode and Antigravity. One command, no tray, no telemetry.</p>
+          <p class="close__p" data-sc-cue="0.04">A Rust traffic light for Claude Code, Qoder, Codex, OpenCode and Antigravity. Run them at the same time and the light still resolves to the most urgent one. One command, no tray, no telemetry.</p>
           <p class="close__links" data-sc-cue="0.04">
             <a class="link" href="https://github.com/its-jani/traffic-status">Repository</a>
-            <a class="link" href="https://github.com/its-jani/traffic-status/releases/tag/v0.3.2">Release notes, v0.3.2</a>
+            <a class="link" href="https://github.com/its-jani/traffic-status/releases/tag/v0.4.0">Release notes, v0.4.0</a>
             <a class="link" href="https://www.npmjs.com/package/traffic-status">npm package</a>
           </p>
         </div>
@@ -313,7 +321,7 @@
         </div>
       </div>
       <footer class="close__foot">
-        <span>traffic-status 0.3.2</span>
+        <span>traffic-status 0.4.0</span>
         <span>MIT licensed</span>
         <span>Windows 10 / 11, x64</span>
       </footer>
